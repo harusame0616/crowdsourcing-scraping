@@ -40,6 +40,11 @@ async function main() {
 				visible: !project.hidden
 					? {
 							create: {
+								title: project.title,
+								description: project.description,
+								category: project.category,
+								publicationDate: project.publicationDate,
+								isRecruiting: project.isRecruiting,
 								fixedWage:
 									project.wageType === WageType.Fixed
 										? {
