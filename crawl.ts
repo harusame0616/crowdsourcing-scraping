@@ -29,12 +29,23 @@ class CrawlingUsecase {
 }
 
 async function main() {
-	// const crawler = new CoconalaCrawler();
-	const coconalaCrawlUsecase = new CrawlingUsecase(new CoconalaCrawler(), [], {
-		saveMany: async (projects: Project[]) => {
-			console.log(JSON.stringify(projects, null, 2));
+	const coconalaCrawlUsecase = new CrawlingUsecase(
+		new CoconalaCrawler(),
+		[
+			"https://coconala.com/requests/categories/231?ref=header&categoryId=231&page=1&recruiting=true",
+			"https://coconala.com/requests/categories/230?ref=header&categoryId=230&page=1&recruiting=true",
+			"https://coconala.com/requests/categories/232?ref=header&categoryId=232&page=1&recruiting=true",
+			"https://coconala.com/requests/categories/237?ref=header&categoryId=237&page=1&recruiting=true",
+			"https://coconala.com/requests/categories/813?ref=header&categoryId=813&page=1&recruiting=true",
+			"https://coconala.com/requests/categories/239?ref=header&categoryId=239&page=1&recruiting=true",
+			"https://coconala.com/requests/categories/236?ref=header&categoryId=236&page=1&recruiting=true",
+		],
+		{
+			saveMany: async (projects: Project[]) => {
+				console.log(JSON.stringify(projects, null, 2));
+			},
 		},
-	});
+	);
 
 	const crowdworksCrawlUsecase = new CrawlingUsecase(
 		new CrowdWorksCrawler(),

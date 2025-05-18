@@ -43,9 +43,6 @@ function toBudget(rawBudget: string): Budget | undefined {
 		min: jpMoneyUnitToNumber(rawBudget),
 		max: jpMoneyUnitToNumber(rawBudget),
 	};
-
-	console.log(rawBudget);
-	throw new Error("Invalid budget format");
 }
 
 // 2025年1月1日 -> 2025-01-01
@@ -73,18 +70,18 @@ export class CoconalaCrawler implements Crawler {
 
 			const links: string[] = [];
 
-			const detailLinks = $(".c-searchItem_detailLink")
+			const projectId = $(".c-searchItem_detailLink")
 				.map((_, element) => {
 					const relativeUrl = $(element).attr("href");
 					if (!relativeUrl) {
 						throw new Error("relativeUrl is undefined");
 					}
-					return new URL(relativeUrl, "https://coconala.com").href;
+					return relativeUrl.replace("https://coconala.com/requests/", "")
 				})
 				.get()
 				.filter(Boolean);
 
-			links.push(...detailLinks);
+			links.push(...projectId);
 
 			return links;
 		} catch (error) {
@@ -93,8 +90,8 @@ export class CoconalaCrawler implements Crawler {
 		}
 	}
 
-	async detail(url: string): Promise<Project> {
-		console.log(url);
+	async detail(projectId: string): Promise<Project> {
+		const url = `https://coconala.com/requests/${projectId}`;
 		const response = await fetch(url);
 		const html = await response.text();
 		const $ = cheerio.load(html);
@@ -127,8 +124,10 @@ export class CoconalaCrawler implements Crawler {
 			.includes("募集終了");
 
 		return {
-			wageType: WageType.Fixed,
+			projectId,
 			platform: Platform.Coconala,
+			hidden:false,
+			wageType: WageType.Fixed,
 			url,
 			title,
 			category,

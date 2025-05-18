@@ -1,7 +1,27 @@
 [
 	{
-		"wageType": "fixed",
+		"projectId": "4213242",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
+		"url": "https://coconala.com/requests/4213242",
+		"title": "メルカリShopsへの商品登録を行うAPIの開発",
+		"category": "プログラミング・ソフトウェア",
+		"budget": {
+			"min": 30000,
+			"max": 50000
+		},
+		"deliveryDate": "2025-06-08",
+		"recruitingLimit": "2025-06-01",
+		"description": "【 募集詳細 】\nメルカリShopsへ商品登録並びに在庫調整を行うためのAPI開発をお願いいたします。\n・開発内容：\n現在、弊社では自社商品をメルカリShopsへ商品登録を行うためのオンライン画面の開発を行っております。\nその中でメルカリShopsへ連携するためのAPI開発をお願いいたします。\n\n内容としては２本のAPIとなります。\n①商品登録API\n②在庫数変更API",
+		"publicationDate": "2025-05-18",
+		"isRecruiting": true
+	},
+	{
+		"projectId": "4212237",
+		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4212237",
 		"title": "【人柄重視】プログラミングもできて多彩な経験をお持ちの方",
 		"category": "プログラミング・ソフトウェア",
@@ -12,8 +32,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4211403",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4211403",
 		"title": "企業情報のスクレイピングツール",
 		"category": "プログラミング・ソフトウェア",
@@ -27,8 +49,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4205917",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4205917",
 		"title": "手書き帳票の番号をOCRで自動読み取り・Excel化するColabスクリプトの開発支援",
 		"category": "プログラミング・ソフトウェア",
@@ -42,8 +66,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4204589",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4204589",
 		"title": "システム改修",
 		"category": "プログラミング・ソフトウェア",
@@ -58,8 +84,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4203427",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4203427",
 		"title": "AndroidのapkファイルのSdkVersion変更",
 		"category": "プログラミング・ソフトウェア",
@@ -74,8 +102,41 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4213571",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
+		"url": "https://coconala.com/requests/4213571",
+		"title": "ゲーム、トレード自動出品ツール",
+		"category": "作業自動化・効率化",
+		"budget": {
+			"min": 5000,
+			"max": 5000
+		},
+		"deliveryDate": "2025-05-28",
+		"recruitingLimit": "2025-05-25",
+		"description": "自動出品、自動更新のツールをいただきたいです。\n教えていただきたいです。\nプログラミングわかりません。\n15分おきに作成したテンプレートを出品\n出品前に画像認識のチェックが必要\nゲーム、トレードに詳しい方に依頼したいです。\nよろしくお願い致します",
+		"publicationDate": "2025-05-18",
+		"isRecruiting": true
+	},
+	{
+		"projectId": "4213524",
+		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
+		"url": "https://coconala.com/requests/4213524",
+		"title": "Amazon、DMM、駿河屋、他ECサイトの入荷通知botの作成依頼",
+		"category": "作業自動化・効率化",
+		"recruitingLimit": "2025-06-01",
+		"description": "AmazonやDMM、駿河屋、yahooショッピング、楽天市場の自動入荷通知のbot作成依頼\n\n入荷通知のアフィリエイトリンクが自分の物に書き換えてX(旧ツイッター)にポストできるものを作成して欲しいです。\n\n事前に商品を設定してその商品が入荷⇨システムが検知⇨商品入荷のポストを自動投稿。\n\n\nXの仕様で同日に同じ内容のポストを行うと、弾かれるので、ポストされるときに投稿時間が自動で記載されるようにしてほしいです。\n\n当方、プログラムに明るい方ではないので、WIN 11にインストールして、JANコードもしくはAISNコードと添付画像のような文を事前に登録できるようなプログラムでお願いしたいです。",
+		"publicationDate": "2025-05-18",
+		"isRecruiting": true
+	},
+	{
+		"projectId": "4212939",
+		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4212939",
 		"title": "シフト表作成　自動化",
 		"category": "作業自動化・効率化",
@@ -85,8 +146,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4212517",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4212517",
 		"title": "画像作成自動化プログラム、ツールの作成実績作り可",
 		"category": "作業自動化・効率化",
@@ -99,8 +162,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4210885",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4210885",
 		"title": "GoogleMap情報を条件下で収集するツール",
 		"category": "作業自動化・効率化",
@@ -115,8 +180,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4210456",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4210456",
 		"title": "LINEに来るメンション通知を特定のグループにまとめてください",
 		"category": "作業自動化・効率化",
@@ -127,8 +194,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4209578",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4209578",
 		"title": "RPAを活用した業務自動化",
 		"category": "作業自動化・効率化",
@@ -139,8 +208,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4208324",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4208324",
 		"title": "株価取得のVBA作成",
 		"category": "作業自動化・効率化",
@@ -154,8 +225,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4208136",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4208136",
 		"title": "複数のyoutubeアカウントで一斉に一つのチャンネル登録できるようなシステムを構築して欲しい",
 		"category": "作業自動化・効率化",
@@ -165,8 +238,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4206400",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4206400",
 		"title": "LINE STEPの構築",
 		"category": "作業自動化・効率化",
@@ -177,8 +252,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4205570",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4205570",
 		"title": "求人原稿を自動作成する方法",
 		"category": "作業自動化・効率化",
@@ -189,8 +266,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4203870",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4203870",
 		"title": "WordPressサイト×Googleフォーム連携による入会申込書PDF自動生成",
 		"category": "作業自動化・効率化",
@@ -200,8 +279,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4202548",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4202548",
 		"title": "CSVデータのPDF変換化",
 		"category": "作業自動化・効率化",
@@ -216,8 +297,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4190369",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4190369",
 		"title": "オークションやフリマの出品自動化",
 		"category": "作業自動化・効率化",
@@ -227,8 +310,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4210624",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4210624",
 		"title": "Stripeの3Dセキュア対応のクレジット決済プラグインの修正",
 		"category": "システム開発",
@@ -243,8 +328,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4209807",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4209807",
 		"title": "ブランディアオークションで自動購入",
 		"category": "システム開発",
@@ -254,8 +341,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4205303",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4205303",
 		"title": "Lステップ × Zapier連携構築",
 		"category": "システム開発",
@@ -269,8 +358,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4203979",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4203979",
 		"title": "eラーニングシステムの自社移行開発（ID発行機能＋テキストチャット機能＋講師・受講者画面）",
 		"category": "システム開発",
@@ -285,8 +376,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4197708",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4197708",
 		"title": "[実務経験者限定] 自社買取サイトの商品データベース再構築・WP連携・構造化設計",
 		"category": "システム開発",
@@ -297,8 +390,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4212073",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4212073",
 		"title": "出会い系アプリの開発",
 		"category": "モバイルアプリ開発",
@@ -312,8 +407,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4211101",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4211101",
 		"title": "バイクツーリング友達を探せるマッチングアプリ",
 		"category": "モバイルアプリ開発",
@@ -324,8 +421,10 @@
 		"isRecruiting": true
 	},
 	{
-		"wageType": "fixed",
+		"projectId": "4207962",
 		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
 		"url": "https://coconala.com/requests/4207962",
 		"title": "Adobe Photoshopを用いて2色印刷（スミ＋特色）用に変換",
 		"category": "Mac・Windowsアプリ開発",
@@ -333,6 +432,52 @@
 		"recruitingLimit": "2025-05-18",
 		"description": "■ 概要\nスキャンされたJPEG画像を、Adobe Photoshopを用いて2色印刷（スミ＋特色）用に変換し、さらに各画像をまとめたPDFファイルと、変換済みの画像ファイル（PSDまたはTIFF）を両方出力する自動化スクリプトの作成を依頼します。\n\n■ 背景と目的\n100ページ以上のスキャン画像を、印刷用にスミ＋シアン／マゼンタ／イエローの2色印刷形式に変換\n\nページごとの画像ファイル（修正や検査用）と、冊子印刷用のPDF（印刷所納品用）両方が必要\n\n人手で行うと膨大な時間がかかるため、Photoshopスクリプトによるバッチ処理での自動化を希望",
 		"publicationDate": "2025-05-15",
+		"isRecruiting": true
+	},
+	{
+		"projectId": "4211540",
+		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
+		"url": "https://coconala.com/requests/4211540",
+		"title": "当方で作成しているFileMaker出で来ているシステムのアカウント作成の方法を教えてほしいです",
+		"category": "その他（IT・プログラミング・開発）",
+		"budget": {
+			"min": 5000,
+			"max": 10000
+		},
+		"deliveryDate": "2025-05-24",
+		"recruitingLimit": "2025-05-31",
+		"description": "当方で作成しているFileMakerで出来て居るシステムのアカウント作成の方法を教えてほしいです\n\nFileMakerに詳しい方にお願いしたいです。\n当方のサーバー内にあるFileMakerで出来て居るシステムの新規アカウントの作り方を解析して貰い、\nその仕方を教えてほしいです。\n\nよろしくお願いいたします。",
+		"publicationDate": "2025-05-17",
+		"isRecruiting": true
+	},
+	{
+		"projectId": "4204233",
+		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
+		"url": "https://coconala.com/requests/4204233",
+		"title": "パソコンにPT3での設定",
+		"category": "その他（IT・プログラミング・開発）",
+		"deliveryDate": "2025-05-18",
+		"recruitingLimit": "2025-05-21",
+		"description": "【 募集詳細 】\nOSを再インストールしたらPT3が見れなくなりました。\n何度か試したのですが出来ませんので\nわかる方でしたらすぐ終わることかと思いますので\n再度設定して頂ける方を募集します。\n\nこれを見てわかる方のみでお願いいたします。\n\n【 重視する点・開発経験 】\nPT3をご自身で使用歴がある方",
+		"publicationDate": "2025-05-14",
+		"isRecruiting": true
+	},
+	{
+		"projectId": "4196818",
+		"platform": "coconala",
+		"hidden": false,
+		"wageType": "fixed",
+		"url": "https://coconala.com/requests/4196818",
+		"title": "mq4の改善",
+		"category": "その他（IT・プログラミング・開発）",
+		"deliveryDate": "2025-05-12",
+		"recruitingLimit": "2025-05-25",
+		"description": "AIを使ってmq4を書かせ、コンパイルエラーはなくなり稼働はするものの、私が意図する動きになっているかどうか不安があります。デモで動かしてうまくいかない場合はさらにAIで修正をしているがなかなか先に進めない。\nバックテストができない構造です。\nmq4のコードを提供しますので、mq4で返していただけるかたのみ募集いたします。",
+		"publicationDate": "2025-05-11",
 		"isRecruiting": true
 	}
 ]

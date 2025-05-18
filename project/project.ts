@@ -5,8 +5,18 @@ export type Budget = {
 	min: number | undefined;
 	max: number | undefined;
 };
-export type ProjectCommon = {
+
+export type ProjectBase = {
+	projectId: string;
 	platform: Platform;
+}
+
+export type ProjectHidden = ProjectBase & {
+	hidden: true;
+}
+
+export type ProjectVisible = ProjectBase & {
+	hidden: false;
 	url: string;
 	title: string;
 	category: string;
@@ -14,29 +24,26 @@ export type ProjectCommon = {
 	description: string;
 	publicationDate: string;
 	isRecruiting: boolean;
-};
+}
+
+
 export type Period = {
 	min: number | undefined;
 	max: number | undefined;
 };
 
-export type ProjectFixedWage = ProjectCommon & {
+export type ProjectFixedWage = ProjectVisible & {
 	wageType: typeof WageType.Fixed;
 	budget: Budget | undefined;
 	deliveryDate: string | undefined;
 };
 
-export type ProjectTimeWage = ProjectCommon & {
+export type ProjectTimeWage = ProjectVisible & {
 	wageType: typeof WageType.Time;
 	workingTime: WorkingTime | undefined;
 	hourlyBudget: Budget | undefined;
 	period: Period | undefined;
 };
 
-type ProjectHidden = {
-	platform: Platform;
-	url: string;
-	visibility: "hidden";
-};
 
 export type Project = ProjectFixedWage | ProjectTimeWage | ProjectHidden;

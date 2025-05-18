@@ -3,7 +3,7 @@ import type {
 	Budget,
 	Period,
 	Project,
-	ProjectCommon,
+	ProjectVisible,
 	WorkingTime,
 } from "../project";
 import { Platform, WageType } from "../project";
@@ -134,15 +134,15 @@ export class CrowdWorksCrawler implements Crawler {
 				({ job_offer }) => job_offer.id,
 			);
 
-			return jobIds.map((id) => `https://crowdworks.jp/public/jobs/${id}`);
+			return jobIds;
 		} catch (error) {
 			console.error(`Error scraping: ${error.message}`);
 			return [];
 		}
 	}
 
-	async detail(url: string): Promise<Project> {
-		console.log(url);
+	async detail(projectId: string): Promise<Project> {
+		const url = `https://crowdworks.jp/public/jobs/${projectId}`;
 		const response = await fetch(url);
 		const html = await response.text();
 		const $ = cheerio.load(html);
@@ -151,8 +151,8 @@ export class CrowdWorksCrawler implements Crawler {
 		if (title === "非公開のお仕事") {
 			return {
 				platform: Platform.CrowdWorks,
-				url,
-				visibility: "hidden",
+				projectId,
+				hidden: true,
 			};
 		}
 		const category = $(".subtitle>a").text().trim();
@@ -182,8 +182,10 @@ export class CrowdWorksCrawler implements Crawler {
 		const wageType = $('th:contains("固定報酬制")').text().trim()
 			? WageType.Fixed
 			: WageType.Time;
-		const projectCommon: ProjectCommon = {
+		const projectVisible: ProjectVisible = {
 			platform: Platform.CrowdWorks,
+			projectId,
+			hidden: false,
 			title,
 			url,
 			recruitingLimit,
@@ -198,7 +200,7 @@ export class CrowdWorksCrawler implements Crawler {
 				wageType: WageType.Fixed,
 				budget,
 				deliveryDate,
-				...projectCommon,
+				...projectVisible,
 			};
 		}
 
@@ -215,7 +217,7 @@ export class CrowdWorksCrawler implements Crawler {
 			hourlyBudget,
 			workingTime,
 			period,
-			...projectCommon,
+			...projectVisible,
 		};
 	}
 }
