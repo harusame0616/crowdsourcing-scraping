@@ -38,7 +38,15 @@ export default async function NextPage() {
 			},
 		},
 		where: {
-			ignore: null,
+			OR: [
+				{
+					ignore: null,
+					visible: {
+						isRecruiting: true,
+					},
+				},
+				{ hidden: {} },
+			],
 		},
 	});
 
