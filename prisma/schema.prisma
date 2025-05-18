@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Platform {
+  Coconala
+  Lancers
+  CrowdWorks
+}
+
+model Project {
+  projectId String
+  platform  Platform
+
+  createdAt DateTime @default(now()) @ignore
+  updatedAt DateTime @default(now()) @updatedAt @ignore
+
+  hidden    ProjectHidden?  @relation(name: "hidden", fields: [hiddenId], references: [hiddenId])
+  hiddenId  String?
+  visible   ProjectVisible? @relation(name: "visible", fields: [visibleId], references: [visibleId])
+  visibleId String?
+
+  @@id([projectId, platform])
+}
+
+model ProjectHidden {
+  hiddenId String @id @default(uuid())
+
+  createdAt DateTime @default(now()) @ignore
+  updatedAt DateTime @default(now()) @updatedAt @ignore
+
+  projects Project[] @relation("hidden")
+}
+
+model ProjectVisible {
+  visibleId String @id @default(uuid())
+
+  createdAt DateTime @default(now()) @ignore
+  updatedAt DateTime @default(now()) @updatedAt @ignore
+
+  fixedWage   ProjectFixedWage? @relation(fields: [fixedWageId], references: [fixedWageId])
+  fixedWageId String?
+  timeWage    ProjectTimeWage?  @relation(fields: [timeWageId], references: [timeWageId])
+  timeWageId  String?
+
+  projects Project[] @relation("visible")
+}
+
+model ProjectFixedWage {
+  fixedWageId String @id @default(uuid())
+
+  budgetMin    Int?
+  budgetMax    Int?
+  deliveryDate String?
+
+  createdAt DateTime @default(now()) @ignore
+  updatedAt DateTime @default(now()) @updatedAt @ignore
+
+  visibles ProjectVisible[]
+}
+
+model ProjectTimeWage {
+  timeWageId String @id @default(uuid())
+
+  workingTime Int?
+  budgetMin   Int?
+  budgetMax   Int?
+  periodMin   Int?
+  periodMax   Int?
+
+  createdAt DateTime @default(now()) @ignore
+  updatedAt DateTime @default(now()) @updatedAt @ignore
+
+  visibles ProjectVisible[]
+}
