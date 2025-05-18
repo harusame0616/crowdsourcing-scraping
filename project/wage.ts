@@ -8,9 +8,17 @@ export const WageType = {
 	Fixed: "fixed",
 } as const;
 
-type WageType = (typeof WageType)[keyof typeof WageType];
+export type WageType = (typeof WageType)[keyof typeof WageType];
+
+export const WorkingTimeUnit = {
+	Weekly: "week",
+	Monthly: "month",
+} as const;
+
+export type WorkingTimeUnit =
+	(typeof WorkingTimeUnit)[keyof typeof WorkingTimeUnit];
 
 export type WorkingTime = {
-	unit: "Weekly" | "Monthly";
+	unit: WorkingTimeUnit;
 	time: number;
 };

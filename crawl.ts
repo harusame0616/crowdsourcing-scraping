@@ -70,7 +70,7 @@ async function main() {
 	);
 
 	await Promise.all([
-		coconalaCrawlUsecase.execute(),
+		// coconalaCrawlUsecase.execute(),
 		crowdworksCrawlUsecase.execute(),
 	]);
 }

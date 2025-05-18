@@ -105,14 +105,16 @@ function rawBudgetToBudget(rawBudget: string): Budget | undefined {
 }
 
 // 2025年1月1日 -> 2025-01-01
-function jpDateToHyphenDate(jpDate: string) {
-	const m = jpDate.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+function toDate(jpDateStr: string) {
+	const m = jpDateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
 	if (!m) {
 		throw new Error("Invalid date format");
 	}
 
 	const [, year, month, day] = m;
-	return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+	return new Date(
+		`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T00:00:00.000+09:00`,
+	);
 }
 
 export class CrowdWorksCrawler implements Crawler {
@@ -167,12 +169,12 @@ export class CrowdWorksCrawler implements Crawler {
 		const deliveryDate =
 			rawDeliveryDate === "-" || rawDeliveryDate === ""
 				? undefined
-				: jpDateToHyphenDate(rawDeliveryDate);
+				: toDate(rawDeliveryDate);
 
-		const recruitingLimit = jpDateToHyphenDate(
+		const recruitingLimit = toDate(
 			$('th:contains("応募期限")').next("td").text().trim(),
 		);
-		const publicationDate = jpDateToHyphenDate(
+		const publicationDate = toDate(
 			$('th:contains("掲載日")').next("td").text().trim(),
 		);
 		const description = $(".confirm_outside_link").text().trim();

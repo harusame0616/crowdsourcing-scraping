@@ -46,14 +46,16 @@ function toBudget(rawBudget: string): Budget | undefined {
 }
 
 // 2025年1月1日 -> 2025-01-01
-function jpDateToHyphenDate(jpDate: string) {
+function jpDateStringToDate(jpDate: string) {
 	const m = jpDate.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
 	if (!m) {
 		throw new Error("Invalid date format");
 	}
 
 	const [, year, month, day] = m;
-	return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+	return new Date(
+		`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T00:00:00.000+09:00`,
+	);
 }
 
 export class CoconalaCrawler implements Crawler {
@@ -76,7 +78,7 @@ export class CoconalaCrawler implements Crawler {
 					if (!relativeUrl) {
 						throw new Error("relativeUrl is undefined");
 					}
-					return relativeUrl.replace("https://coconala.com/requests/", "")
+					return relativeUrl.replace("https://coconala.com/requests/", "");
 				})
 				.get()
 				.filter(Boolean);
@@ -107,11 +109,11 @@ export class CoconalaCrawler implements Crawler {
 		const deliveryDate =
 			rawDeliveryDate === "ご相談"
 				? undefined
-				: jpDateToHyphenDate(rawDeliveryDate);
-		const recruitingLimit = jpDateToHyphenDate(
+				: jpDateStringToDate(rawDeliveryDate);
+		const recruitingLimit = jpDateStringToDate(
 			$(".c-requestOutlineRowContent_additional>span").text().trim(),
 		);
-		const publicationDate = jpDateToHyphenDate(
+		const publicationDate = jpDateStringToDate(
 			$(".c-requestOutlineRowContent_additional")
 				.text()
 				.split("掲載日")[1]
@@ -126,7 +128,7 @@ export class CoconalaCrawler implements Crawler {
 		return {
 			projectId,
 			platform: Platform.Coconala,
-			hidden:false,
+			hidden: false,
 			wageType: WageType.Fixed,
 			url,
 			title,
