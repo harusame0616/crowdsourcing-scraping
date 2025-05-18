@@ -25,6 +25,12 @@ CREATE TABLE "ProjectHidden" (
 -- CreateTable
 CREATE TABLE "ProjectVisible" (
     "visibleId" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "recruitingLimit" TIMESTAMP(3),
+    "publicationDate" TIMESTAMP(3) NOT NULL,
+    "isRecruiting" BOOLEAN NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "fixedWageId" TEXT,
@@ -38,7 +44,7 @@ CREATE TABLE "ProjectFixedWage" (
     "fixedWageId" TEXT NOT NULL,
     "budgetMin" INTEGER,
     "budgetMax" INTEGER,
-    "deliveryDate" TEXT,
+    "deliveryDate" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

@@ -48,6 +48,13 @@ model ProjectHidden {
 model ProjectVisible {
   visibleId String @id @default(uuid())
 
+  title           String
+  description     String
+  category        String
+  recruitingLimit DateTime?
+  publicationDate DateTime
+  isRecruiting    Boolean
+
   createdAt DateTime @default(now()) @ignore
   updatedAt DateTime @default(now()) @updatedAt @ignore
 
