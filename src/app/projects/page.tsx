@@ -1,4 +1,4 @@
-import { PrismaClient } from "@/generated/prisma";
+import { PrismaClient, Platform as PrismaPlatform } from "@/generated/prisma";
 import {
 	Platform,
 	type ProjectFixedWage,
@@ -18,7 +18,8 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
-
+import { Button } from "@/components/ui/button";
+import { revalidatePath } from "next/cache";
 export default async function NextPage() {
 	const prisma = new PrismaClient();
 	const prismaProjects = await prisma.project.findMany({
@@ -35,6 +36,9 @@ export default async function NextPage() {
 			visible: {
 				publicationDate: "desc",
 			},
+		},
+		where: {
+			ignore: null
 		},
 	});
 
@@ -131,6 +135,7 @@ function ProjectTable({ projects }: { projects: Project[] }) {
 					<TableHead>Method</TableHead>
 					<TableHead className="text-right">報酬タイプ</TableHead>
 					<TableHead className="text-right">公開日</TableHead>
+					<TableHead className="text-right">無視</TableHead>
 				</TableRow>
 			</TableHeader>
 			<TableBody>
@@ -168,6 +173,28 @@ function ProjectTable({ projects }: { projects: Project[] }) {
 											: "時間報酬"}
 									</TableCell>
 									<TableCell>{project.publicationDate.toISOString()}</TableCell>
+									<TableCell>
+										<Button
+											type="button"
+											onClick={async () => {
+												"use server";
+
+												const prisma = new PrismaClient();
+												await prisma.projectIgnore.create({
+													data: {
+														projectId: project.projectId,
+														platform:
+															project.platform === Platform.Coconala
+																? PrismaPlatform.Coconala
+																: PrismaPlatform.CrowdWorks,
+													},
+												});
+												revalidatePath("/projects");
+											}}
+										>
+											無視
+										</Button>
+									</TableCell>
 								</>
 							)}
 						</TableRow>
