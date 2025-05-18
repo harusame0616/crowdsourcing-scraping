@@ -38,7 +38,7 @@ export default async function NextPage() {
 			},
 		},
 		where: {
-			ignore: null
+			ignore: null,
 		},
 	});
 
@@ -130,9 +130,9 @@ function ProjectTable({ projects }: { projects: Project[] }) {
 			<TableCaption>A list of your recent invoices.</TableCaption>
 			<TableHeader>
 				<TableRow>
+					<TableHead className="w-[100px]">プラットフォーム</TableHead>
 					<TableHead className="w-[100px]">タイトル</TableHead>
 					<TableHead>カテゴリ</TableHead>
-					<TableHead>Method</TableHead>
 					<TableHead className="text-right">報酬タイプ</TableHead>
 					<TableHead className="text-right">公開日</TableHead>
 					<TableHead className="text-right">無視</TableHead>
@@ -150,9 +150,12 @@ function ProjectTable({ projects }: { projects: Project[] }) {
 								<>
 									<TableCell>
 										<Link href={url} target="_blank" className="underline">
-											非公開
+											{project.platform === Platform.Coconala
+												? "coconala"
+												: "クラウドワークス"}
 										</Link>
 									</TableCell>
+									<TableCell>非公開</TableCell>
 									<TableCell>-</TableCell>
 									<TableCell>-</TableCell>
 									<TableCell>-</TableCell>
@@ -162,11 +165,13 @@ function ProjectTable({ projects }: { projects: Project[] }) {
 								<>
 									<TableCell>
 										<Link href={url} target="_blank" className="underline">
-											{project.title}
+											{project.platform === Platform.Coconala
+												? "coconala"
+												: "クラウドワークス"}
 										</Link>
 									</TableCell>
+									<TableCell>{project.title}</TableCell>
 									<TableCell>{project.category}</TableCell>
-									<TableCell>{project.platform}</TableCell>
 									<TableCell>
 										{project.wageType === WageType.Fixed
 											? "固定報酬"
