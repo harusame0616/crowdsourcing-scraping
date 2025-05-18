@@ -1,0 +1,338 @@
+[
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4212237",
+		"title": "【人柄重視】プログラミングもできて多彩な経験をお持ちの方",
+		"category": "プログラミング・ソフトウェア",
+		"deliveryDate": "2025-06-30",
+		"recruitingLimit": "2025-05-31",
+		"description": "【 募集詳細 】\nWEBサービスを作れる方の募集\n・開発内容：\n家計簿やお金のデータを幅広く扱うWEBサービスの開発に携わっていただきたいです。\n\n【 重視する点・開発経験 】\n・人柄\n・柔軟な思考\n・難しいコードや専門用語をわかりやす言葉に言語化できる方",
+		"publicationDate": "2025-05-17",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4211403",
+		"title": "企業情報のスクレイピングツール",
+		"category": "プログラミング・ソフトウェア",
+		"budget": {
+			"max": 5000
+		},
+		"deliveryDate": "2025-06-30",
+		"recruitingLimit": "2025-05-24",
+		"description": "【 募集詳細 】\n【目的】\nWebサイト上に公開されている企業情報を、自動で取得・整理し、Word形式のレポートとして出力するプログラムの作成。\n\n【主な要件】\n・指定した企業情報ページ（URL）から、企業情報（例：会社概要、ニュース、事業内容等）を取得\n　※ニュースはPDFファイルでアップされていることが多いですが\n　　もし可能であればPDFファイルの内容も同時にスクレイピングできると助かります。\n\n・取得した情報をWord形式で自動的に出力（レイアウトの整ったレポート形式）",
+		"publicationDate": "2025-05-17",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4205917",
+		"title": "手書き帳票の番号をOCRで自動読み取り・Excel化するColabスクリプトの開発支援",
+		"category": "プログラミング・ソフトウェア",
+		"budget": {
+			"min": 10000,
+			"max": 30000
+		},
+		"recruitingLimit": "2025-05-21",
+		"description": "【 募集詳細 】\n特定の帳票PDFから、手書きで記入された番号情報（数字）を読み取り、整列・抽出してExcelに出力するGoogle Colab上のPythonスクリプトの開発を依頼します。\n\n現在、構想段階の処理フローと試作的なコードは一部ありますが、全体として機能するものではなく、根本的に設計・実装を見直す必要がある状態です。\nAI-OCRや画像処理に習熟したエンジニアの方と一緒に構築を進めていきたいと考えています。\n\n【 開発内容（想定） 】\n・スキャン済みのPDF帳票（複数ページ）をページごとに画像化\n・テンプレート画像と比較して、画像の位置ズレ・回転ズレを自動で補正\n・特定の領域に記入された 手書きのID番号（5～8桁）や1～2桁の数字 をOCRで読み取る処理",
+		"publicationDate": "2025-05-14",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4204589",
+		"title": "システム改修",
+		"category": "プログラミング・ソフトウェア",
+		"budget": {
+			"min": 5000,
+			"max": 10000
+		},
+		"deliveryDate": "2025-05-23",
+		"recruitingLimit": "2025-05-18",
+		"description": "こんにちは\n開発しているデバイスをWebブラウザ上からプログラム制御するシステムに関し、 一部動作に支障が出ているため、プログラムの改修をお願いしたいと考えています。\n\n### ■ ご依頼の背景・概要\n\n市販のデバイスをWebブラウザ経由で操縦できるサービスを制作しています。\n\n当社独自開発の中継機器（Wi-Fiをルーターとデバイスの両方に接続可能なハードウェア）を活用し、デバイスとの通信を安定化させています。\n\n現在、以下のような挙動が確認されています：",
+		"publicationDate": "2025-05-14",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4203427",
+		"title": "AndroidのapkファイルのSdkVersion変更",
+		"category": "プログラミング・ソフトウェア",
+		"budget": {
+			"min": 3000,
+			"max": 3000
+		},
+		"deliveryDate": "2025-05-20",
+		"recruitingLimit": "2025-05-20",
+		"description": "指定するAndroidの音楽再生アプリのapkファイルのSDKバージョン(targetSdkVersion)を「23」に変更して下さい。\n\nご質問がありましたら、気軽にお問い合わせください。\n応募をお待ちしております！",
+		"publicationDate": "2025-05-13",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4212939",
+		"title": "シフト表作成　自動化",
+		"category": "作業自動化・効率化",
+		"recruitingLimit": "2025-05-31",
+		"description": "【 募集詳細 】\nシフト表作業の自動化をお願いします。\n\n【現状のオペレーション】\n60人程度の従業員が毎月希望を出し、それを元に手作業で考えシフトを作成しています。\n週休2日、有給休暇、午前勤務、午後勤務\n3交代（8:30-17:15  16:30-1:15  0:30-9:15）、\n2交代  (8:30-17:15  16:30-9:15)\n希望の休みの前日は夜間勤務にしない\n新人のみで勤務を組んではいけない",
+		"publicationDate": "2025-05-18",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4212517",
+		"title": "画像作成自動化プログラム、ツールの作成実績作り可",
+		"category": "作業自動化・効率化",
+		"budget": {
+			"max": 5000
+		},
+		"recruitingLimit": "2025-05-31",
+		"description": "実績作り可【インスタグラム用画像作成依頼】画像作成自動化プログラム、ツールの作成実績作り可【インスタグラム用画像作成依頼】画像１０枚ほど～作成自動化【インスタグラム用画像作成プログラム、ツール作成依頼】画像作成自動化プログラム、ツールの作成実績を積みたい方を募集しています。資料を元に画像に文字を挿入してSNS用の画像を作成。【募集内容】納期なし提供する資料を基にした画像作成インスタグラム向けのデザインフリー画像サイトからの関連画像引用】プログラミング経験　３０００円～",
+		"publicationDate": "2025-05-17",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4210885",
+		"title": "GoogleMap情報を条件下で収集するツール",
+		"category": "作業自動化・効率化",
+		"budget": {
+			"min": 10000,
+			"max": 30000
+		},
+		"deliveryDate": "2025-06-14",
+		"recruitingLimit": "2025-05-23",
+		"description": "【 募集詳細 】\n以下条件下でGoogleMap情報を自動的に収集しリスト化するシステムツールを開発いただきたいです。\n\n【条件下の詳細】\n<必須事項>\n・市町村でエリアを指定できる\n・業態を指定できる（美容室、居酒屋、フレンチ、ネイルサロンなど）\n　→美容、飲食店など中規模ジャンルでも可です。\n・評価の指定ができる（☆4以上のみ、☆3以下のみなど）\n　→指定ができなくとも、リスト収集に制限がなければ、作成後のリスト内にて絞り込みをするので問題　ございません。",
+		"publicationDate": "2025-05-16",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4210456",
+		"title": "LINEに来るメンション通知を特定のグループにまとめてください",
+		"category": "作業自動化・効率化",
+		"deliveryDate": "2025-05-22",
+		"recruitingLimit": "2025-05-23",
+		"description": "＜書き方の例＞\n※修正してご利用ください。不要部分や本メッセージは削除してからご送信ください。\n\n【 募集詳細 】\nLINEに来るメンション通知を特定のグループにまとめてください\n\n【現状のオペレーション】\n受託業をしており、複数のLINEグループに参加していますが、自分宛のメンション通知を見逃してしまうことがよくあります。\n\nそのため、「自分宛のメンションだけを抽出して確認できる仕組み」を作っていただける方を探しています。",
+		"publicationDate": "2025-05-16",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4209578",
+		"title": "RPAを活用した業務自動化",
+		"category": "作業自動化・効率化",
+		"deliveryDate": "2025-05-31",
+		"recruitingLimit": "2025-05-30",
+		"description": "【 募集詳細 】\n継続的な依頼を受けていただける方を募集します。\npower automate desktopを活用した業務自動化を、\nビデオチャット等を使用してレクチャーをしながら\nフローを一緒に作成していただける方を探しております。\n\n【現状のオペレーション】\n手作業によるPC作業の一部を自動化\n\n【 重視する点・開発経験 】",
+		"publicationDate": "2025-05-16",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4208324",
+		"title": "株価取得のVBA作成",
+		"category": "作業自動化・効率化",
+		"budget": {
+			"max": 5000
+		},
+		"deliveryDate": "2025-05-18",
+		"recruitingLimit": "2025-05-18",
+		"description": "高配当株投資をしており、保有銘柄が100を超えました。\n数日に一度株価を更新して入力しているのですが、面倒になってきました。\nチャットGPTに聞きながら挑戦しましたが結局上手くいかず。\n\nお詳しい方のお知恵をいただきたいです。\n\n欲しい情報その日の対象証券コードの終値を反映させて欲しい。\n前日と一週間前の株価と比較した増減率のランキングを（トップ10、ワースト10）作成いただきたいです。\n\nエクセル：2016",
+		"publicationDate": "2025-05-15",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4208136",
+		"title": "複数のyoutubeアカウントで一斉に一つのチャンネル登録できるようなシステムを構築して欲しい",
+		"category": "作業自動化・効率化",
+		"recruitingLimit": "2025-05-25",
+		"description": "＜書き方の例＞\n※修正してご利用ください。不要部分や本メッセージは削除してからご送信ください。\n\n【 募集詳細 】\nChromeの拡張機能などで、１つのチャンネルに\n一度たくさんのチャンネル登録をしていただけるような、システムを作っていただきたいです。\n\nご質問がありましたら、気軽にお問い合わせください。\n応募をお待ちしております！",
+		"publicationDate": "2025-05-15",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4206400",
+		"title": "LINE STEPの構築",
+		"category": "作業自動化・効率化",
+		"deliveryDate": "2025-07-31",
+		"recruitingLimit": "2025-05-22",
+		"description": "初めまして。\n下記募集をいたしますので具体な提案をお願いいたします。\n\n【 募集詳細 】\nLINE　STEPを利用しての採用応募対応の自動化をお願いします。\nまた、LINE内自動予約システムを使い、面談スケジュールの予約日確定までできるようにしたいと思っております。\n\n【現状のオペレーション】\nエントリーフォーム・電話にて対応",
+		"publicationDate": "2025-05-15",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4205570",
+		"title": "求人原稿を自動作成する方法",
+		"category": "作業自動化・効率化",
+		"deliveryDate": "2025-06-30",
+		"recruitingLimit": "2025-05-28",
+		"description": "indeedに掲載する求人原稿を沢山生産したいと考えております。\n\n・全てオリジナルの原稿\n・職種は30種類程度\n・仕事内容やアピールポイントが原稿ごとに異なる\n\nGoogleフォームなどで\n職種やアピールポイントを複数選択し、\n選択された内容をもとに原稿が自動的に\n作成されるGASなどを作れるかたは",
+		"publicationDate": "2025-05-14",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4203870",
+		"title": "WordPressサイト×Googleフォーム連携による入会申込書PDF自動生成",
+		"category": "作業自動化・効率化",
+		"recruitingLimit": "2025-05-21",
+		"description": "募集内容\nWordPressで運用中のサイトにて、Googleフォームで収集した入会情報を既存のA4申込書レイアウト（Wordベース）に自動で反映し、PDFを出力する仕組みの開発をお願いいたします。出力されたPDFは管理者へ自動メール送信、またはGoogle ドライブへ保存する流れが理想です。\n\n【 募集詳細 】\nGoogleフォームでの回答をトリガーに、Wordテンプレートへ差し込み → PDFを自動生成し、メール送信 or Drive保存する自動化スクリプトの作成をお願いします。\n\n【 現状のオペレーション 】\n\nWord申込書に手作業で入力 → PDF保存",
+		"publicationDate": "2025-05-14",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4202548",
+		"title": "CSVデータのPDF変換化",
+		"category": "作業自動化・効率化",
+		"budget": {
+			"min": 10000,
+			"max": 30000
+		},
+		"deliveryDate": "2025-05-31",
+		"recruitingLimit": "2025-05-27",
+		"description": "【 募集詳細 】\n某在庫管理システムから出荷実績のCSVを抽出し、そのデータを納品明細として規定のエクセルフォーマットへ移し替えしPDFへ変換したいです。\n\n【現状のオペレーション】\n物流倉庫から出荷明細がFAXで届き、事務員が手入力でExcelへ打ち込み、得意先へメールしております。\n\n【 重視する点・開発経験 】\n物流DXの観点で業務効率化の提案が出来る方。\n\n【 応募時のお願い 】",
+		"publicationDate": "2025-05-13",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4190369",
+		"title": "オークションやフリマの出品自動化",
+		"category": "作業自動化・効率化",
+		"recruitingLimit": "2025-05-18",
+		"description": "【 募集詳細 】\nオークションやフリマの自動化ソフトの作成を考えています。\n\n【現状のオペレーション】\n１，撮影した商品画像（５枚）と指示文面をchatGPTに入れる。\n→出てきた文面を出品画面に張り付ける\n\n２，商品画像（５枚）を出品画面にいれる。\n３，固定の発送方法や商品価格を入力する。",
+		"publicationDate": "2025-05-08",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4210624",
+		"title": "Stripeの3Dセキュア対応のクレジット決済プラグインの修正",
+		"category": "システム開発",
+		"budget": {
+			"min": 30000,
+			"max": 50000
+		},
+		"deliveryDate": "2025-05-31",
+		"recruitingLimit": "2025-05-21",
+		"description": "【 募集詳細 】\nStripeの3Dセキュア対応のクレジット決済プラグインの修正\n\n【 重視する点・開発経験 】\n・現在、3Dセキュア未対応のクレジット決済プラグインを活用しています\nStripeの3Dセキュア対応のクレジット決済プラグインの修正してくださる方を探しております\n\n\n【 応募時のお願い 】\nご質問がありましたら、気軽にお問い合わせください。",
+		"publicationDate": "2025-05-16",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4209807",
+		"title": "ブランディアオークションで自動購入",
+		"category": "システム開発",
+		"recruitingLimit": "2025-05-30",
+		"description": "【 募集詳細 】\n買取業を営んでおります。\n日々の接客の合間にネットで仕入れを行うこともあるのですがタイミングが合わず同業者の買い占めに困っております(1秒待たず売り切れ多数)。\nどなたかお力添えをよろしくお願いいたします。\n\n【 重視する点・開発経験 】\n確実性\n\n【 応募時のお願い 】",
+		"publicationDate": "2025-05-16",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4205303",
+		"title": "Lステップ × Zapier連携構築",
+		"category": "システム開発",
+		"budget": {
+			"min": 150000,
+			"max": 200000
+		},
+		"recruitingLimit": "2025-05-21",
+		"description": "■ やりたいこと（目的）\n「LINE（Lステップ）」を起点に、\nユーザーの登録情報（名前・写真・身分証など）を受け取り、Zapierを使ってGoogleスプレッドシートやAPI経由で外部DBと連携し、アプリでのログインに繋げる登録導線を構築したいと考えています。\n\n\n■ 導線全体のイメージ（ステップ）\n1，LPからLINE友達追加（Lステップ）\n2，自動応答で「登録フォーム（氏名・顔写真・身分証など）」を送信\n3，登録情報をZapier経由で外部DB or Googleスプレッドシートに送信\n4，外部システム（パートナー会社構築の本番DB）とAPI連携",
+		"publicationDate": "2025-05-14",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4203979",
+		"title": "eラーニングシステムの自社移行開発（ID発行機能＋テキストチャット機能＋講師・受講者画面）",
+		"category": "システム開発",
+		"budget": {
+			"min": 100000,
+			"max": 150000
+		},
+		"deliveryDate": "2025-07-31",
+		"recruitingLimit": "2025-05-28",
+		"description": "■ 概要\n現在、弊社で使用している「むにみWEB制作」のeラーニングシステム（https://munimi.newphase.link）を、より柔軟に運用するために 自社独自のシステムとして再構築したいと考えています。\n\n■ 開発目的\n管理性・拡張性の向上\n受講者ごとにID・パスワードを発行し、個別ログインを可能にしたい\nLINEやChatworkのようなチャット形式で、講師と受講者がテキストでやり取りできるようにしたい\n■ 主な機能要件\n【1】ユーザー管理機能",
+		"publicationDate": "2025-05-14",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4197708",
+		"title": "[実務経験者限定] 自社買取サイトの商品データベース再構築・WP連携・構造化設計",
+		"category": "システム開発",
+		"deliveryDate": "2025-06-30",
+		"recruitingLimit": "2025-05-25",
+		"description": "【依頼背景】 ホビー・ゲーム・フィギュア等の宅配買取サイトを運営しています。\n\n\n現在は一部商品データが wp_products_list に登録されていますが、\n・WordPressとの連携 ・商品ページの出力\n・構造化データを見据えた設計 これらを引き継ぎまたは再構築いただける実務経験者を募集します。\n\n【目的】\n・商品情報（最終的に万件規模）を一元管理\n・WordPressで商品ページ・検索・カテゴリ別表示を実装 リニュアルサイトに実装予定。サイトは[figma]で制作途中。",
+		"publicationDate": "2025-05-11",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4212073",
+		"title": "出会い系アプリの開発",
+		"category": "モバイルアプリ開発",
+		"budget": {
+			"min": 50000,
+			"max": 80000
+		},
+		"recruitingLimit": "2025-05-31",
+		"description": "【依頼内容】\n外国人と日本人をつなぐ、スマホ向けのマッチングアプリの開発を希望しています。\n具体的な内容や目的は、応募後に個別にご説明させていただきます。\n\n⸻\n\n【必要な主な要素】\n\t•\tiOS / Android 対応（Flutter希望）\n\t•\tユーザー登録 / プロフィール設定\n\t•\tチャット機能（翻訳連携の構想あり）",
+		"publicationDate": "2025-05-17",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4211101",
+		"title": "バイクツーリング友達を探せるマッチングアプリ",
+		"category": "モバイルアプリ開発",
+		"deliveryDate": "2025-06-30",
+		"recruitingLimit": "2025-05-24",
+		"description": "【 募集詳細 】\nバイクツーリングの友達を探せるマッチングアプリ開発を依頼したいです。\n\n・開発内容：一般的な恋人を探せるようなマッチングアプリと同じように写真を載せられてプロフィール欄がありスワイプでいいねを送れる。年齢、性別、車種、地域によって検索ができる。募集一覧から投稿をしたり投稿を確認できる。フォローフォロワー機能がある。\n\nIOSアプリのみ配信します。\n\nスタートアップの為、初期費用をなるべく抑えてスタートしたいと考えてます。\n\nその為アップデート依頼もその後させて頂けると嬉しいです。長い付き合いさせてください！",
+		"publicationDate": "2025-05-17",
+		"isRecruiting": true
+	},
+	{
+		"wageType": "fixed",
+		"platform": "coconala",
+		"url": "https://coconala.com/requests/4207962",
+		"title": "Adobe Photoshopを用いて2色印刷（スミ＋特色）用に変換",
+		"category": "Mac・Windowsアプリ開発",
+		"deliveryDate": "2025-05-31",
+		"recruitingLimit": "2025-05-18",
+		"description": "■ 概要\nスキャンされたJPEG画像を、Adobe Photoshopを用いて2色印刷（スミ＋特色）用に変換し、さらに各画像をまとめたPDFファイルと、変換済みの画像ファイル（PSDまたはTIFF）を両方出力する自動化スクリプトの作成を依頼します。\n\n■ 背景と目的\n100ページ以上のスキャン画像を、印刷用にスミ＋シアン／マゼンタ／イエローの2色印刷形式に変換\n\nページごとの画像ファイル（修正や検査用）と、冊子印刷用のPDF（印刷所納品用）両方が必要\n\n人手で行うと膨大な時間がかかるため、Photoshopスクリプトによるバッチ処理での自動化を希望",
+		"publicationDate": "2025-05-15",
+		"isRecruiting": true
+	}
+]
