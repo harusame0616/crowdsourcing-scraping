@@ -1,5 +1,4 @@
 import * as cheerio from "cheerio";
-import { setTimeout } from "node:timers/promises";
 import type {
 	Budget,
 	Period,
