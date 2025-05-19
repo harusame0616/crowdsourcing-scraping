@@ -73,6 +73,7 @@ export async function ProjectDetail({
 			</div>
 			<div
 				className="whitespace-pre-wrap"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
 				dangerouslySetInnerHTML={{
 					__html: project.visible.description,
 				}}
