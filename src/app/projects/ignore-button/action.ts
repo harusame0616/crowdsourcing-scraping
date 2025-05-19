@@ -2,6 +2,7 @@
 import prisma from "@/lib/prisma";
 import { Platform as PrismaPlatform } from "@/generated/prisma";
 import { Platform } from "../../../../project";
+import { revalidatePath } from "next/cache";
 
 type IgnoreProjectActionParams = {
 	projectId: string;
@@ -21,4 +22,7 @@ export async function ignoreProjectAction({
 					: PrismaPlatform.CrowdWorks,
 		},
 	});
+
+	revalidatePath("/projects");
+	revalidatePath(`/projects/${platform}/${projectId}`);
 }
