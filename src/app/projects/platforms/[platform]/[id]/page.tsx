@@ -1,10 +1,10 @@
-import { ProjectDetail } from "@/app/projects/project-detail";
+import { ProjectDetailContainer } from "@/app/projects/project-detail";
 import type { Platform } from "../../../../../../project";
 
 function NextPage({ params }: { params: { platform: string; id: string } }) {
 	return (
 		<div>
-			<ProjectDetail
+			<ProjectDetailContainer
 				projectId={params.id}
 				platform={params.platform as Platform}
 			/>

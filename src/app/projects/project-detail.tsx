@@ -1,11 +1,18 @@
 import prisma from "@/lib/prisma";
-import { Platform } from "../../../project";
+import {
+	Platform,
+	type Project,
+	type ProjectFixedWage,
+	type ProjectHidden,
+	type ProjectTimeWage,
+	WageType,
+	WorkingTimeUnit,
+} from "../../../project";
 import { Platform as PlatformPrisma } from "@/generated/prisma";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { revalidatePath } from "next/cache";
+import { IgnoreButton } from "./ignore-button";
 
-export async function ProjectDetail({
+export async function ProjectDetailContainer({
 	projectId,
 	platform,
 }: {
@@ -37,47 +44,130 @@ export async function ProjectDetail({
 		return <div>プロジェクトが見つかりません</div>;
 	}
 
+	if (project.hidden) {
+		return (
+			<ProjectDetailPresenter
+				project={
+					{
+						projectId: project.projectId,
+						platform:
+							project.platform === PlatformPrisma.Coconala
+								? Platform.Coconala
+								: Platform.CrowdWorks,
+						hidden: true,
+					} satisfies ProjectHidden
+				}
+			/>
+		);
+	}
+
+	if (project.visible?.fixedWage) {
+		return (
+			<ProjectDetailPresenter
+				project={
+					{
+						projectId: project.projectId,
+						platform:
+							project.platform === PlatformPrisma.Coconala
+								? Platform.Coconala
+								: Platform.CrowdWorks,
+						hidden: !!project.hidden,
+						category: project.visible?.category ?? "",
+						description: project.visible?.description ?? "",
+						publicationDate: project.visible?.publicationDate ?? new Date(),
+						isRecruiting: project.visible?.isRecruiting ?? false,
+						title: project.visible?.title ?? "",
+						recruitingLimit: project.visible?.recruitingLimit ?? null,
+						wageType: WageType.Fixed,
+						budget: {
+							min: project.visible?.fixedWage?.budgetMin ?? undefined,
+							max: project.visible?.fixedWage?.budgetMax ?? undefined,
+						},
+						deliveryDate: project.visible?.fixedWage?.deliveryDate ?? undefined,
+					} satisfies ProjectFixedWage
+				}
+			/>
+		);
+	}
+
+	if (project.visible?.timeWage) {
+		return (
+			<ProjectDetailPresenter
+				project={
+					{
+						projectId: project.projectId,
+						platform:
+							project.platform === PlatformPrisma.Coconala
+								? Platform.Coconala
+								: Platform.CrowdWorks,
+						hidden: !!project.hidden,
+						category: project.visible?.category ?? "",
+						description: project.visible?.description ?? "",
+						publicationDate: project.visible?.publicationDate ?? new Date(),
+						isRecruiting: project.visible?.isRecruiting ?? false,
+						title: project.visible?.title ?? "",
+						recruitingLimit: project.visible?.recruitingLimit ?? null,
+						wageType: WageType.Time,
+						workingTime: project.visible?.timeWage?.workingTime
+							? {
+									unit: WorkingTimeUnit.Weekly,
+									time: project.visible?.timeWage?.workingTime,
+								}
+							: undefined,
+						hourlyBudget: {
+							min: project.visible?.timeWage?.budgetMin ?? undefined,
+							max: project.visible?.timeWage?.budgetMax ?? undefined,
+						},
+						period: {
+							min: project.visible?.timeWage?.periodMin ?? undefined,
+							max: project.visible?.timeWage?.periodMax ?? undefined,
+						},
+					} satisfies ProjectTimeWage
+				}
+			/>
+		);
+	}
+
+	throw new Error("Invalid project");
+}
+
+export async function ProjectDetailPresenter({
+	project,
+}: {
+	project: Project;
+}) {
 	const url =
-		platform === Platform.Coconala
+		project.platform === Platform.Coconala
 			? `https://coconala.com/projects/${project.projectId}`
 			: `https://crowdworks.jp/public/jobs/${project.projectId}`;
 
-	if (project.visible === null) {
+	if (project.hidden) {
 		return <div>非公開案件</div>;
 	}
 
 	return (
 		<div>
 			<div className="">
-				<div className="flex gap-4">
+				<h1 className="text-2xl font-bold">
 					<Link href={url} target="_blank">
-						{project.visible.title}
+						{project.title}
 					</Link>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={async () => {
-							"use server";
-							await prisma.projectIgnore.create({
-								data: {
-									projectId: project.projectId,
-									platform: project.platform,
-								},
-							});
-							revalidatePath("/projects");
-						}}
-					>
-						無視
-					</Button>
+				</h1>
+				<div>
+					<IgnoreButton
+						projectId={project.projectId}
+						platform={project.platform}
+					/>
 				</div>
 			</div>
-			<div
-				className="whitespace-pre-wrap"
-				// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
-				dangerouslySetInnerHTML={{
-					__html: project.visible.description,
-				}}
-			/>
+			<div className="overflow-y-auto">
+				<div
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+					dangerouslySetInnerHTML={{
+						__html: project.description,
+					}}
+				/>
+			</div>
 		</div>
 	);
 }

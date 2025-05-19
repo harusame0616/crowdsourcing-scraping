@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import type { Platform } from "../../../../project";
 import { startTransition } from "react";
@@ -11,14 +13,14 @@ export function IgnoreButton({
 }: {
 	platform: Platform;
 	projectId: string;
-	onIgnoreStart: () => void;
-	onIgnoreFinish: () => void;
+	onIgnoreStart?: () => void;
+	onIgnoreFinish?: () => void;
 }) {
 	function handleClick() {
 		startTransition(async () => {
-			onIgnoreStart();
+			onIgnoreStart?.();
 			await ignoreProjectAction({ projectId, platform });
-			onIgnoreFinish();
+			onIgnoreFinish?.();
 		});
 	}
 

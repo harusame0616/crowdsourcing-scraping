@@ -10,8 +10,12 @@ import { useRouter } from "next/navigation";
 
 export function Modal({
 	children,
+	title,
+	description,
 }: {
-	children: React.ReactNode;
+	children?: React.ReactNode;
+	title: string;
+	description?: string;
 }) {
 	const router = useRouter();
 	return (
@@ -24,8 +28,8 @@ export function Modal({
 		>
 			<DialogContent className="max-w-[90vw]!">
 				<DialogHeader>
-					<DialogTitle>案件詳細</DialogTitle>
-					<DialogDescription />
+					<DialogTitle>{title}</DialogTitle>
+					<DialogDescription>{description}</DialogDescription>
 				</DialogHeader>
 				<div className="overflow-y-auto max-h-[70vh]">{children}</div>
 			</DialogContent>
