@@ -1,25 +1,14 @@
-import {} from "@/generated/prisma";
+import prisma from "@/lib/prisma";
 import {
 	Platform,
-	type ProjectFixedWage,
 	type Project,
+	type ProjectFixedWage,
 	type ProjectHidden,
-	WageType,
 	type ProjectTimeWage,
+	WageType,
 	WorkingTimeUnit,
 } from "../../../project";
-import {
-	Table,
-	TableBody,
-	TableCaption,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
-import Link from "next/link";
-import prisma from "@/lib/prisma";
-import { IgnoreButton } from "./ignore-button";
+import { Projects } from "./projects";
 export default async function NextPage() {
 	const prismaProjects = await prisma.project.findMany({
 		include: {
@@ -126,74 +115,7 @@ export default async function NextPage() {
 
 	return (
 		<div>
-			<ProjectTable projects={projects} />
+			<Projects projects={projects} />
 		</div>
-	);
-}
-
-function ProjectTable({ projects }: { projects: Project[] }) {
-	return (
-		<Table>
-			<TableCaption>A list of your recent invoices.</TableCaption>
-			<TableHeader>
-				<TableRow>
-					<TableHead className="">プラットフォーム</TableHead>
-					<TableHead className="">タイトル</TableHead>
-					<TableHead className="text-right">無視</TableHead>
-				</TableRow>
-			</TableHeader>
-			<TableBody>
-				{projects.map((project) => {
-					const url =
-						project.platform === Platform.Coconala
-							? `https://coconala.com/requests/${project.projectId}`
-							: `https://crowdworks.jp/public/jobs/${project.projectId}`;
-					return (
-						<TableRow key={project.projectId}>
-							{project.hidden ? (
-								<>
-									<TableCell>
-										<Link href={url} target="_blank" className="underline">
-											{project.platform === Platform.Coconala
-												? "coconala"
-												: "クラウドワークス"}
-										</Link>
-									</TableCell>
-									<TableCell>非公開</TableCell>
-									<TableCell>-</TableCell>
-									<TableCell>-</TableCell>
-									<TableCell>-</TableCell>
-									<TableCell>-</TableCell>
-								</>
-							) : (
-								<>
-									<TableCell>
-										<Link href={url} target="_blank" className="underline">
-											{project.platform === Platform.Coconala
-												? "coconala"
-												: "クラウドワークス"}
-										</Link>
-									</TableCell>
-									<TableCell>
-										<Link
-											href={`/projects/platforms/${project.platform}/${project.projectId}`}
-											className="underline"
-										>
-											{project.title}
-										</Link>
-									</TableCell>
-									<TableCell>
-										<IgnoreButton
-											platform={project.platform}
-											projectId={project.projectId}
-										/>
-									</TableCell>
-								</>
-							)}
-						</TableRow>
-					);
-				})}
-			</TableBody>
-		</Table>
 	);
 }
