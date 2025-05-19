@@ -119,7 +119,7 @@ export class CoconalaCrawler implements Crawler {
 				.split("掲載日")[1]
 				.trim(),
 		);
-		const description = $(".c-detailRowContentText").text().trim();
+		const description = $(".c-detailRowContentText").html()?.trim();
 		const isRecruiting = !$(".c-requestOutlineRow_content:nth(2)")
 			.text()
 			.trim()

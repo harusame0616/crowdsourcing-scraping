@@ -177,7 +177,7 @@ export class CrowdWorksCrawler implements Crawler {
 		const publicationDate = toDate(
 			$('th:contains("掲載日")').next("td").text().trim(),
 		);
-		const description = $(".confirm_outside_link").text().trim();
+		const description = $(".confirm_outside_link").html()?.trim();
 		const isRecruiting = !$(
 			'span:contains("このお仕事の募集は終了しています。")',
 		).text();
