@@ -178,7 +178,14 @@ function ProjectTable({ projects }: { projects: Project[] }) {
 												: "クラウドワークス"}
 										</Link>
 									</TableCell>
-									<TableCell>{project.title}</TableCell>
+									<TableCell>
+										<Link
+											href={`/projects/platforms/${project.platform}/${project.projectId}`}
+											className="underline"
+										>
+											{project.title}
+										</Link>
+									</TableCell>
 									<TableCell>{project.category}</TableCell>
 									<TableCell>
 										{project.wageType === WageType.Fixed
