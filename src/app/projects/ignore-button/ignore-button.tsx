@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import type { Platform } from "../../../project";
-import { ignoreProjectAction } from "./@modal/actions/ignore-project";
+import type { Platform } from "../../../../project";
 import { startTransition } from "react";
+import { ignoreProjectAction } from "./action";
 
 export function IgnoreButton({
 	platform,
