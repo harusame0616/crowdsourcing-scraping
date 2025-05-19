@@ -138,11 +138,8 @@ function ProjectTable({ projects }: { projects: Project[] }) {
 			<TableCaption>A list of your recent invoices.</TableCaption>
 			<TableHeader>
 				<TableRow>
-					<TableHead className="w-[100px]">プラットフォーム</TableHead>
-					<TableHead className="w-[100px]">タイトル</TableHead>
-					<TableHead>カテゴリ</TableHead>
-					<TableHead className="text-right">報酬タイプ</TableHead>
-					<TableHead className="text-right">公開日</TableHead>
+					<TableHead className="">プラットフォーム</TableHead>
+					<TableHead className="">タイトル</TableHead>
 					<TableHead className="text-right">無視</TableHead>
 				</TableRow>
 			</TableHeader>
@@ -186,13 +183,6 @@ function ProjectTable({ projects }: { projects: Project[] }) {
 											{project.title}
 										</Link>
 									</TableCell>
-									<TableCell>{project.category}</TableCell>
-									<TableCell>
-										{project.wageType === WageType.Fixed
-											? "固定報酬"
-											: "時間報酬"}
-									</TableCell>
-									<TableCell>{project.publicationDate.toISOString()}</TableCell>
 									<TableCell>
 										<Button
 											type="button"
