@@ -1,4 +1,4 @@
-import { PrismaClient, Platform as PrismaPlatform } from "@/generated/prisma";
+import {} from "@/generated/prisma";
 import {
 	Platform,
 	type ProjectFixedWage,
@@ -18,9 +18,8 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
+import { IgnoreButton } from "./ignore-button";
 export default async function NextPage() {
 	const prismaProjects = await prisma.project.findMany({
 		include: {
@@ -184,26 +183,10 @@ function ProjectTable({ projects }: { projects: Project[] }) {
 										</Link>
 									</TableCell>
 									<TableCell>
-										<Button
-											type="button"
-											onClick={async () => {
-												"use server";
-
-												const prisma = new PrismaClient();
-												await prisma.projectIgnore.create({
-													data: {
-														projectId: project.projectId,
-														platform:
-															project.platform === Platform.Coconala
-																? PrismaPlatform.Coconala
-																: PrismaPlatform.CrowdWorks,
-													},
-												});
-												revalidatePath("/projects");
-											}}
-										>
-											無視
-										</Button>
+										<IgnoreButton
+											platform={project.platform}
+											projectId={project.projectId}
+										/>
 									</TableCell>
 								</>
 							)}
