@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -16,22 +15,17 @@ export function Modal({
 }) {
 	const router = useRouter();
 	return (
-		<Dialog open={true} defaultOpen={true}>
+		<Dialog
+			open={true}
+			defaultOpen={true}
+			onOpenChange={() => {
+				router.back();
+			}}
+		>
 			<DialogContent className="max-w-[90vw]!">
 				<DialogHeader>
 					<DialogTitle>案件詳細</DialogTitle>
 					<DialogDescription />
-					<div>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => {
-								router.back();
-							}}
-						>
-							戻る
-						</Button>
-					</div>
 				</DialogHeader>
 				<div className="overflow-y-auto max-h-[70vh]">{children}</div>
 			</DialogContent>
