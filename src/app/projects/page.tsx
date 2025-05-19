@@ -20,8 +20,8 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { revalidatePath } from "next/cache";
+import prisma from "@/lib/prisma";
 export default async function NextPage() {
-	const prisma = new PrismaClient();
 	const prismaProjects = await prisma.project.findMany({
 		include: {
 			hidden: true,
