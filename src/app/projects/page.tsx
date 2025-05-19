@@ -48,7 +48,7 @@ export default async function NextPage() {
 						isRecruiting: true,
 					},
 				},
-				{ hidden: {} },
+				{ hidden: {}, ignore: null },
 			],
 		},
 	});

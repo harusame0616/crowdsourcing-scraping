@@ -12,27 +12,29 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import { IgnoreButton } from "./ignore-button";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useOptimistic, useState } from "react";
 
-export function Projects({ projects }: { projects: Project[] }) {
+export function Projects({
+	projects: initialProjects,
+}: { projects: Project[] }) {
+	const [projects, setProjects] = useState(initialProjects);
 	const [optimisticProjects, setOptimisticProjects] =
-		useState<Project[]>(projects);
-	const router = useRouter();
+		useOptimistic<Project[]>(projects);
 
-	function handleIgnoreStart({
-		projectId,
-		platform,
-	}: { projectId: string; platform: Platform }) {
-		setOptimisticProjects(
-			optimisticProjects.filter(
+	function handleIgnoreStart(projectId: string, platform: Platform) {
+		setOptimisticProjects([
+			...optimisticProjects.filter(
 				(p) => p.projectId !== projectId && p.platform === platform,
 			),
-		);
+		]);
 	}
 
-	function handleIgnoreFinish() {
-		router.refresh();
+	function handleIgnoreFinish(projectId: string, platform: Platform) {
+		setProjects([
+			...projects.filter(
+				(p) => p.projectId !== projectId && p.platform === platform,
+			),
+		]);
 	}
 
 	return (
@@ -46,7 +48,7 @@ export function Projects({ projects }: { projects: Project[] }) {
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{projects.map((project) => {
+				{optimisticProjects.map((project, index) => {
 					const url =
 						project.platform === Platform.Coconala
 							? `https://coconala.com/requests/${project.projectId}`
@@ -88,12 +90,11 @@ export function Projects({ projects }: { projects: Project[] }) {
 									<TableCell>
 										<IgnoreButton
 											onIgnoreStart={() =>
-												handleIgnoreStart({
-													projectId: project.projectId,
-													platform: project.platform,
-												})
+												handleIgnoreStart(project.projectId, project.platform)
 											}
-											onIgnoreFinish={handleIgnoreFinish}
+											onIgnoreFinish={() =>
+												handleIgnoreFinish(project.projectId, project.platform)
+											}
 											platform={project.platform}
 											projectId={project.projectId}
 										/>
