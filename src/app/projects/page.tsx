@@ -20,11 +20,26 @@ export default async function NextPage() {
 				},
 			},
 		},
-		orderBy: {
-			visible: {
-				publicationDate: "desc",
+		orderBy: [
+			{
+				hidden: {
+					hiddenId: "asc",
+				},
 			},
-		},
+			{
+				visible: {
+					publicationDate: "desc",
+				},
+			},
+			{
+				platform: "asc",
+			},
+			{
+				visible: {
+					title: "asc",
+				},
+			},
+		],
 		where: {
 			OR: [
 				{
