@@ -1,33 +1,30 @@
-"use client";
 import { Button } from "@/components/ui/button";
 import type { Platform } from "../../../project";
 import { ignoreProjectAction } from "./@modal/actions/ignore-project";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { LoaderIcon } from "lucide-react";
+import { startTransition } from "react";
 
 export function IgnoreButton({
 	platform,
 	projectId,
-}: { platform: Platform; projectId: string }) {
-	const router = useRouter();
-	const [isPending, startTransition] = useTransition();
-
-	async function handleClick() {
+	onIgnoreStart,
+	onIgnoreFinish,
+}: {
+	platform: Platform;
+	projectId: string;
+	onIgnoreStart: () => void;
+	onIgnoreFinish: () => void;
+}) {
+	function handleClick() {
 		startTransition(async () => {
+			onIgnoreStart();
 			await ignoreProjectAction({ projectId, platform });
-			router.refresh();
+			onIgnoreFinish();
 		});
 	}
 
 	return (
-		<Button
-			type="button"
-			onClick={handleClick}
-			disabled={isPending}
-			className="w-16"
-		>
-			{isPending ? <LoaderIcon className="animate-spin" /> : "無視"}
+		<Button type="button" onClick={handleClick} className="w-16">
+			無視
 		</Button>
 	);
 }

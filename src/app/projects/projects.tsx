@@ -12,8 +12,29 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import { IgnoreButton } from "./ignore-button";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function Projects({ projects }: { projects: Project[] }) {
+	const [optimisticProjects, setOptimisticProjects] =
+		useState<Project[]>(projects);
+	const router = useRouter();
+
+	function handleIgnoreStart({
+		projectId,
+		platform,
+	}: { projectId: string; platform: Platform }) {
+		setOptimisticProjects(
+			optimisticProjects.filter(
+				(p) => p.projectId !== projectId && p.platform === platform,
+			),
+		);
+	}
+
+	function handleIgnoreFinish() {
+		router.refresh();
+	}
+
 	return (
 		<Table>
 			<TableCaption>A list of your recent invoices.</TableCaption>
@@ -66,6 +87,13 @@ export function Projects({ projects }: { projects: Project[] }) {
 									</TableCell>
 									<TableCell>
 										<IgnoreButton
+											onIgnoreStart={() =>
+												handleIgnoreStart({
+													projectId: project.projectId,
+													platform: project.platform,
+												})
+											}
+											onIgnoreFinish={handleIgnoreFinish}
 											platform={project.platform}
 											projectId={project.projectId}
 										/>
