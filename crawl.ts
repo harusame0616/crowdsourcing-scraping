@@ -3,6 +3,7 @@ import { CoconalaCrawler } from "./crawler/coconala-crawler";
 import { setTimeout } from "node:timers/promises";
 import type { Project } from "./project";
 import type { Crawler } from "./crawler/crawler";
+import fs from "node:fs/promises";
 
 class CrawlingUsecase {
 	constructor(
@@ -42,6 +43,11 @@ async function main() {
 		],
 		{
 			saveMany: async (projects: Project[]) => {
+				await fs.writeFile(
+					"coconala-projects.json",
+					JSON.stringify(projects, null, 2),
+					"utf-8",
+				);
 				console.log(JSON.stringify(projects, null, 2));
 			},
 		},
@@ -64,13 +70,17 @@ async function main() {
 		],
 		{
 			saveMany: async (projects: Project[]) => {
-				console.log(JSON.stringify(projects, null, 2));
+				await fs.writeFile(
+					"crowdworks-projects.json",
+					JSON.stringify(projects, null, 2),
+					"utf-8",
+				);
 			},
 		},
 	);
 
 	await Promise.all([
-		// coconalaCrawlUsecase.execute(),
+		coconalaCrawlUsecase.execute(),
 		crowdworksCrawlUsecase.execute(),
 	]);
 }

@@ -3,8 +3,8 @@ import { Platform as PrismaPlatform, PrismaClient } from "@/generated/prisma";
 console.log(process.env.DATABASE_URL);
 console.log("----");
 const prisma = new PrismaClient();
-import coconalaProject from "./coconala-2025-05-19.json";
-import crowdWorksProject from "./crowdworks-2025-05-19.json";
+import coconalaProject from "./coconala-projects.json";
+import crowdWorksProject from "./crowdworks-projects.json";
 import { Platform, type Project, WageType } from "./project";
 
 async function main() {
