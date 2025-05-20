@@ -13,6 +13,18 @@ export async function ignoreProjectAction({
 	projectId,
 	platform,
 }: IgnoreProjectActionParams) {
+	const existingIgnore = await prisma.projectIgnore.findFirst({
+		where: {
+			projectId,
+			platform:
+				platform === Platform.Coconala
+					? PrismaPlatform.Coconala
+					: PrismaPlatform.CrowdWorks,
+		},
+	});
+	if (existingIgnore) {
+		return;
+	}
 	await prisma.projectIgnore.create({
 		data: {
 			projectId,
