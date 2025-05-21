@@ -46,21 +46,33 @@
     "isRecruiting": true
   },
   {
-    "projectId": "4203427",
+    "projectId": "4219853",
     "platform": "coconala",
     "hidden": false,
     "wageType": "fixed",
-    "url": "https://coconala.com/requests/4203427",
-    "title": "AndroidのapkファイルのSdkVersion変更",
-    "category": "プログラミング・ソフトウェア",
+    "url": "https://coconala.com/requests/4219853",
+    "title": "有名掲示板への書き込み Python",
+    "category": "作業自動化・効率化",
     "budget": {
       "min": 3000,
       "max": 3000
     },
-    "deliveryDate": "2025-05-19T15:00:00.000Z",
-    "recruitingLimit": "2025-05-19T15:00:00.000Z",
-    "description": "指定するAndroidの音楽再生アプリのapkファイルのSDKバージョン(targetSdkVersion)を「23」に変更して下さい。\n\nご質問がありましたら、気軽にお問い合わせください。\n応募をお待ちしております！",
-    "publicationDate": "2025-05-12T15:00:00.000Z",
+    "recruitingLimit": "2025-05-24T15:00:00.000Z",
+    "description": "具体的に書くとbotに削除されてしまうため、断片的に書かせていただきます。\nお察しください。\nとある有名な掲示板で、ツールなどを使った書き込みをしてくれる方を募集します。\nPythonなどのスクリプトに詳しい方が適任かと思います。\n詳しくはメッセージを下さい。",
+    "publicationDate": "2025-05-20T15:00:00.000Z",
+    "isRecruiting": true
+  },
+  {
+    "projectId": "4219788",
+    "platform": "coconala",
+    "hidden": false,
+    "wageType": "fixed",
+    "url": "https://coconala.com/requests/4219788",
+    "title": "GASを用いたスプレッドシートの画像反映スクリプトの改善",
+    "category": "作業自動化・効率化",
+    "recruitingLimit": "2025-05-27T15:00:00.000Z",
+    "description": "現在、Google スプレッドシート上で「画像リンクボタン」を押すと、スクリプトが実行され、Google ドライブに連携された画像URLを元に画像が反映されるようになっています。\n\nただし、画像件数が多くなると 実行時間が5分を超えてしまい、GASの上限に達して一時停止→再試行が必要になる 状況が頻発しています。\n\nこの処理を、以下のいずれかの方法で改善したいと考えています：\n\n・時間制限にかからないよう分割処理する\n\n・トリガーを用いて一定時間おきに順次処理する",
+    "publicationDate": "2025-05-20T15:00:00.000Z",
     "isRecruiting": true
   },
   {
@@ -526,19 +538,6 @@
     "recruitingLimit": "2025-06-01T15:00:00.000Z",
     "description": "【 募集詳細 】\n楽器の演出に用いるオーディオレベルメーターの制作をしていただける方を募集致します。\n基本的な仕様に関しては過去に制作されている方がいらっしゃるため、それにできるだけ近いものを考えています。\n※添付URL参照\n\n【 仕様 】\n・動画内ではM5stickCを使用していますが、同等又はそれ以上の性能を有していればこの限りではありません。\n・発光パターン、カラーに関しても動画内と同じような動作を考えています。\n・動画内の楽器とは異なるものに使用するため、依頼するのはプログラミング、配線までとなります。(取付け部や補強等の作業はこちらで制作します。)",
     "publicationDate": "2025-05-19T15:00:00.000Z",
-    "isRecruiting": true
-  },
-  {
-    "projectId": "4215501",
-    "platform": "coconala",
-    "hidden": false,
-    "wageType": "fixed",
-    "url": "https://coconala.com/requests/4215501",
-    "title": "「急募！！」　MQL4言語できる方",
-    "category": "その他（IT・プログラミング・開発）",
-    "recruitingLimit": "2025-05-19T15:00:00.000Z",
-    "description": "MQL4　言語ができる方募集しています\n\n下記の方を優先してお願いしたいと考えております\n\n・すぐに取り掛かっていただける方\n・納品が早い方\n・MQL4言語がかける方で　インジケーター作成経験者\n・レスポンスが早い方\n\n※　インジケータつくーるなどで　作成しているかたは",
-    "publicationDate": "2025-05-18T15:00:00.000Z",
     "isRecruiting": true
   },
   {
