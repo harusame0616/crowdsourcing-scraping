@@ -22,13 +22,13 @@ export default async function NextPage() {
 		},
 		orderBy: [
 			{
-				hidden: {
-					hiddenId: "asc",
+				visible: {
+					publicationDate: "desc",
 				},
 			},
 			{
-				visible: {
-					publicationDate: "desc",
+				hidden: {
+					hiddenId: "asc",
 				},
 			},
 			{
