@@ -1,5 +1,19 @@
 [
   {
+    "projectId": "4218920",
+    "platform": "coconala",
+    "hidden": false,
+    "wageType": "fixed",
+    "url": "https://coconala.com/requests/4218920",
+    "title": "MT5上で動作する図形・水平線を簡単に引けるツールの制作依頼",
+    "category": "プログラミング・ソフトウェア",
+    "deliveryDate": "2025-06-29T15:00:00.000Z",
+    "recruitingLimit": "2025-06-01T15:00:00.000Z",
+    "description": "以下の3つのツールの作成ができる方を募集させていただきますm(__)m\n\n■ツール1\n\n【目的】\n\nICTが考案した本来のSMCにおけるLiquidity・FVG・オーダブロックを正確かつ簡単に描画できるようにしたい。\n\n【想定しているユーザーインターフェース】",
+    "publicationDate": "2025-05-19T15:00:00.000Z",
+    "isRecruiting": true
+  },
+  {
     "projectId": "4213242",
     "platform": "coconala",
     "hidden": false,
@@ -47,6 +61,60 @@
     "recruitingLimit": "2025-05-19T15:00:00.000Z",
     "description": "指定するAndroidの音楽再生アプリのapkファイルのSDKバージョン(targetSdkVersion)を「23」に変更して下さい。\n\nご質問がありましたら、気軽にお問い合わせください。\n応募をお待ちしております！",
     "publicationDate": "2025-05-12T15:00:00.000Z",
+    "isRecruiting": true
+  },
+  {
+    "projectId": "4218354",
+    "platform": "coconala",
+    "hidden": false,
+    "wageType": "fixed",
+    "url": "https://coconala.com/requests/4218354",
+    "title": "メールの内容を自動でエクセルに転記したい",
+    "category": "作業自動化・効率化",
+    "budget": {
+      "min": 5000,
+      "max": 10000
+    },
+    "deliveryDate": "2025-05-30T15:00:00.000Z",
+    "recruitingLimit": "2025-05-30T15:00:00.000Z",
+    "description": "【 募集詳細 】\nメールに届いた顧客情報のエクセルへの転記をしたい。\n\n【現状のオペレーション】\n内容を見て、手動で組分けしている\n\n【 重視する点・開発経験 】\n・同様の経験がある方\n\n【 応募時のお願い 】",
+    "publicationDate": "2025-05-19T15:00:00.000Z",
+    "isRecruiting": true
+  },
+  {
+    "projectId": "4218342",
+    "platform": "coconala",
+    "hidden": false,
+    "wageType": "fixed",
+    "url": "https://coconala.com/requests/4218342",
+    "title": "メールの自動返信",
+    "category": "作業自動化・効率化",
+    "budget": {
+      "min": 5000,
+      "max": 10000
+    },
+    "deliveryDate": "2025-05-30T15:00:00.000Z",
+    "recruitingLimit": "2025-05-26T15:00:00.000Z",
+    "description": "【 募集詳細 】\nメール返信作業（スポーツクラブの体験受付）の自動化をお願いしたいです。拠点が１５カ所２０コースほどあります。希望の拠点・コースに応じた案内を連絡したいです。\n\n【現状のオペレーション】\n内容を見て、手動で返信している\n\n【 重視する点・開発経験 】\n・完成後も返信内容に変更がある際は、変更できるようにしたい\n\n【 応募時のお願い 】",
+    "publicationDate": "2025-05-19T15:00:00.000Z",
+    "isRecruiting": true
+  },
+  {
+    "projectId": "4218154",
+    "platform": "coconala",
+    "hidden": false,
+    "wageType": "fixed",
+    "url": "https://coconala.com/requests/4218154",
+    "title": "駿河屋（https://www.suruga-ya.jp/） スクレイピングツールの開発",
+    "category": "作業自動化・効率化",
+    "budget": {
+      "min": 10000,
+      "max": 30000
+    },
+    "deliveryDate": "2025-05-30T15:00:00.000Z",
+    "recruitingLimit": "2025-05-25T15:00:00.000Z",
+    "description": "■ 概要\n今回は「駿河屋（https://www.suruga-ya.jp/）」\nのスクレイピングツールの開発をお願いしたいと考えております。\n指定した検索結果URL（後から変更可能）を元に、商品ページを巡回し、商品情報をGoogle検索経由でAmazonと比較し、結果をExcelまたはCSVに出力するツールとなります。\n\n■ ツールの主な仕様\n\n対象URL（例）：\nhttps://www.suruga-ya.jp/search?category=&amp;search_word=iPad&amp;adult_s=2&amp;brand=%E3%82%A2%E3%83%83%E3%83%97%E3%83%AB&amp;is_marketplace=0&amp;price=[9600,9999999]&amp;rankBy=price%3Aascending",
+    "publicationDate": "2025-05-19T15:00:00.000Z",
     "isRecruiting": true
   },
   {
@@ -274,6 +342,20 @@
     "isRecruiting": true
   },
   {
+    "projectId": "4219512",
+    "platform": "coconala",
+    "hidden": false,
+    "wageType": "fixed",
+    "url": "https://coconala.com/requests/4219512",
+    "title": "メルカリ即売れ商品抽出ツールの開発",
+    "category": "システム開発",
+    "deliveryDate": "2025-05-30T15:00:00.000Z",
+    "recruitingLimit": "2025-05-26T15:00:00.000Z",
+    "description": "【 募集詳細 】\nメルカリで即売れした商品（売り切れの商品ページを開いた際、◯分以内に売れた商品）と表示されるものを抽出するツールを作っていただきたいです。\n\n【 応募時のお願い 】\n過去の実績、ポートフォリオを簡易的にご提示ください。\n\nご質問がありましたら、気軽にお問い合わせください。\n応募をお待ちしております！",
+    "publicationDate": "2025-05-19T15:00:00.000Z",
+    "isRecruiting": true
+  },
+  {
     "projectId": "4210624",
     "platform": "coconala",
     "hidden": false,
@@ -416,6 +498,24 @@
     "isRecruiting": true
   },
   {
+    "projectId": "4218389",
+    "platform": "coconala",
+    "hidden": false,
+    "wageType": "fixed",
+    "url": "https://coconala.com/requests/4218389",
+    "title": "ワードプレスサイトに大きなファイルがアップロード出来なくなったので修正をお願いしたいです",
+    "category": "その他（IT・プログラミング・開発）",
+    "budget": {
+      "min": 5000,
+      "max": 10000
+    },
+    "deliveryDate": "2025-05-20T15:00:00.000Z",
+    "recruitingLimit": "2025-05-20T15:00:00.000Z",
+    "description": "専用サーバー　OS　AlmaLinux v8.10.0 STANDARD に、\nWHM Cpanel を入れて、複数のサイトを構築しているのですが、\n\n突然！大きなファイルがアップロード出来なくなったのでWHM CAPNELサーバーの修正をお願いしたいです。\n\nサイト上で、10MB位迄は、UP出来るんですが、それ以上のファイルをメディアにUPしようとすると\n「ファイルに書き込めませんでした！」とエラーが出ます。\n\n一時保存フォルダも、SSHコマンドでクリーンにしたのですが、効果無し、、",
+    "publicationDate": "2025-05-19T15:00:00.000Z",
+    "isRecruiting": true
+  },
+  {
     "projectId": "4217147",
     "platform": "coconala",
     "hidden": false,
@@ -439,24 +539,6 @@
     "recruitingLimit": "2025-05-19T15:00:00.000Z",
     "description": "MQL4　言語ができる方募集しています\n\n下記の方を優先してお願いしたいと考えております\n\n・すぐに取り掛かっていただける方\n・納品が早い方\n・MQL4言語がかける方で　インジケーター作成経験者\n・レスポンスが早い方\n\n※　インジケータつくーるなどで　作成しているかたは",
     "publicationDate": "2025-05-18T15:00:00.000Z",
-    "isRecruiting": true
-  },
-  {
-    "projectId": "4211540",
-    "platform": "coconala",
-    "hidden": false,
-    "wageType": "fixed",
-    "url": "https://coconala.com/requests/4211540",
-    "title": "当方で作成しているFileMaker出で来ているシステムのアカウント作成の方法を教えてほしいです",
-    "category": "その他（IT・プログラミング・開発）",
-    "budget": {
-      "min": 5000,
-      "max": 10000
-    },
-    "deliveryDate": "2025-05-23T15:00:00.000Z",
-    "recruitingLimit": "2025-05-30T15:00:00.000Z",
-    "description": "当方で作成しているFileMakerで出来て居るシステムのアカウント作成の方法を教えてほしいです\n\nFileMakerに詳しい方にお願いしたいです。\n当方のサーバー内にあるFileMakerで出来て居るシステムの新規アカウントの作り方を解析して貰い、\nその仕方を教えてほしいです。\n\nよろしくお願いいたします。",
-    "publicationDate": "2025-05-16T15:00:00.000Z",
     "isRecruiting": true
   },
   {
