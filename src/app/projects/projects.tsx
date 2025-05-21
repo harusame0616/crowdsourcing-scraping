@@ -17,22 +17,31 @@ import { useOptimistic, useState } from "react";
 export function Projects({
 	projects: initialProjects,
 }: { projects: Project[] }) {
-	const [projects, setProjects] = useState(initialProjects);
-	const [optimisticProjects, setOptimisticProjects] =
-		useOptimistic<Project[]>(projects);
+	const [projects, setProjects] = useState(
+		initialProjects.map((project) => ({
+			...project,
+			isDeleted: false,
+		})),
+	);
+
+	const [optimisticProjects, setOptimisticProjects] = useOptimistic(projects);
 
 	function handleIgnoreStart(projectId: string, platform: Platform) {
 		setOptimisticProjects([
-			...optimisticProjects.filter(
-				(p) => p.projectId !== projectId && p.platform === platform,
+			...optimisticProjects.map((p) =>
+				p.projectId === projectId && p.platform === platform
+					? { ...p, isDeleted: true }
+					: p,
 			),
 		]);
 	}
 
 	function handleIgnoreFinish(projectId: string, platform: Platform) {
 		setProjects([
-			...projects.filter(
-				(p) => p.projectId !== projectId && p.platform === platform,
+			...projects.map((p) =>
+				p.projectId === projectId && p.platform === platform
+					? { ...p, isDeleted: true }
+					: p,
 			),
 		]);
 	}
@@ -48,62 +57,67 @@ export function Projects({
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{optimisticProjects.map((project, index) => {
-					const url =
-						project.platform === Platform.Coconala
-							? `https://coconala.com/requests/${project.projectId}`
-							: `https://crowdworks.jp/public/jobs/${project.projectId}`;
-					return (
-						<TableRow key={project.projectId}>
-							{project.hidden ? (
-								<>
-									<TableCell>
-										<Link href={url} target="_blank" className="underline">
-											{project.platform === Platform.Coconala
-												? "coconala"
-												: "クラウドワークス"}
-										</Link>
-									</TableCell>
-									<TableCell>非公開</TableCell>
-									<TableCell>-</TableCell>
-									<TableCell>-</TableCell>
-									<TableCell>-</TableCell>
-									<TableCell>-</TableCell>
-								</>
-							) : (
-								<>
-									<TableCell>
-										<Link href={url} target="_blank" className="underline">
-											{project.platform === Platform.Coconala
-												? "coconala"
-												: "クラウドワークス"}
-										</Link>
-									</TableCell>
-									<TableCell>
-										<Link
-											href={`/projects/platforms/${project.platform}/${project.projectId}`}
-											className="underline"
-										>
-											{project.title}
-										</Link>
-									</TableCell>
-									<TableCell>
-										<IgnoreButton
-											onIgnoreStart={() =>
-												handleIgnoreStart(project.projectId, project.platform)
-											}
-											onIgnoreFinish={() =>
-												handleIgnoreFinish(project.projectId, project.platform)
-											}
-											platform={project.platform}
-											projectId={project.projectId}
-										/>
-									</TableCell>
-								</>
-							)}
-						</TableRow>
-					);
-				})}
+				{optimisticProjects
+					.filter(({ isDeleted }) => !isDeleted)
+					.map((project, index) => {
+						const url =
+							project.platform === Platform.Coconala
+								? `https://coconala.com/requests/${project.projectId}`
+								: `https://crowdworks.jp/public/jobs/${project.projectId}`;
+						return (
+							<TableRow key={project.projectId}>
+								{project.hidden ? (
+									<>
+										<TableCell>
+											<Link href={url} target="_blank" className="underline">
+												{project.platform === Platform.Coconala
+													? "coconala"
+													: "クラウドワークス"}
+											</Link>
+										</TableCell>
+										<TableCell>非公開</TableCell>
+										<TableCell>-</TableCell>
+										<TableCell>-</TableCell>
+										<TableCell>-</TableCell>
+										<TableCell>-</TableCell>
+									</>
+								) : (
+									<>
+										<TableCell>
+											<Link href={url} target="_blank" className="underline">
+												{project.platform === Platform.Coconala
+													? "coconala"
+													: "クラウドワークス"}
+											</Link>
+										</TableCell>
+										<TableCell>
+											<Link
+												href={`/projects/platforms/${project.platform}/${project.projectId}`}
+												className="underline"
+											>
+												{project.title}
+											</Link>
+										</TableCell>
+										<TableCell>
+											<IgnoreButton
+												onIgnoreStart={() =>
+													handleIgnoreStart(project.projectId, project.platform)
+												}
+												onIgnoreFinish={() =>
+													handleIgnoreFinish(
+														project.projectId,
+														project.platform,
+													)
+												}
+												platform={project.platform}
+												projectId={project.projectId}
+											/>
+										</TableCell>
+									</>
+								)}
+							</TableRow>
+						);
+					})}
 			</TableBody>
 		</Table>
 	);
