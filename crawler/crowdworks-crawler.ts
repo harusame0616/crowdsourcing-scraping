@@ -1,4 +1,4 @@
-import * as cheerio from "cheerio";
+import type { Browser } from "playwright";
 import type {
 	Budget,
 	Period,
@@ -118,108 +118,197 @@ function toDate(jpDateStr: string) {
 }
 
 export class CrowdWorksCrawler implements Crawler {
+	constructor(private browser: Browser) {}
 	async listProjectUrls(url: string): Promise<string[]> {
+		console.log(
+			`[CrowdWorksCrawler] Starting to fetch project list from: ${url}`,
+		);
+		let page = null;
 		try {
-			const response = await fetch(url);
+			page = await this.browser.newPage();
+			console.log("[CrowdWorksCrawler] Navigating to listing page...");
+			await page.goto(url);
 
-			if (!response.ok) {
-				throw new Error(`Failed to fetch page: ${response.status}`);
-			}
+			console.log("[CrowdWorksCrawler] Page loaded, waiting for content...");
+			// Wait for the Vue container to load
+			await page.waitForSelector("#vue-container", {
+				timeout: 30000,
+			});
 
-			const html = await response.text();
-			const $ = cheerio.load(html);
-			const data = $("#vue-container").attr("data");
-			if (!data) {
-				throw new Error("data is undefined");
-			}
-			const jobIds: string[] = JSON.parse(data).searchResult.job_offers.map(
-				({ job_offer }) => job_offer.id,
+			// Additional wait to ensure content is rendered
+			await page.waitForTimeout(2000);
+
+			const jobIds = await page.evaluate(() => {
+				const container = document.querySelector("#vue-container");
+				if (!container) {
+					throw new Error("Vue container not found");
+				}
+				const dataAttr = container.getAttribute("data");
+				if (!dataAttr) {
+					throw new Error("data attribute is undefined");
+				}
+				const data = JSON.parse(dataAttr);
+				return data.searchResult.job_offers.map(
+					({ job_offer }: any) => job_offer.id,
+				);
+			});
+
+			console.log(
+				`[CrowdWorksCrawler] Found ${jobIds.length} projects on this page`,
 			);
-
 			return jobIds;
 		} catch (error) {
-			console.error(`Error scraping: ${error.message}`);
+			console.error(
+				`Error scraping: ${error instanceof Error ? error.message : error}`,
+			);
 			return [];
+		} finally {
+			if (page) {
+				await page.close();
+			}
 		}
 	}
 
 	async detail(projectId: string): Promise<Project> {
 		const url = `https://crowdworks.jp/public/jobs/${projectId}`;
-		const response = await fetch(url);
-		const html = await response.text();
-		const $ = cheerio.load(html);
+		console.log(
+			`\n[CrowdWorksCrawler] Fetching details for project: ${projectId}`,
+		);
+		console.log(`[CrowdWorksCrawler] URL: ${url}`);
+		let page = null;
 
-		const [title] = $("h1").text().trim().split("\n");
-		if (title === "非公開のお仕事") {
-			return {
+		try {
+			page = await this.browser.newPage();
+			console.log("[CrowdWorksCrawler] Navigating to detail page...");
+			await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
+
+			console.log("[CrowdWorksCrawler] Page loaded, waiting for content...");
+			// Wait for main content to load
+			await page.waitForSelector("h1", { timeout: 30000 });
+
+			// Additional wait to ensure content is rendered
+			await page.waitForTimeout(2000);
+
+			console.log("[CrowdWorksCrawler] Extracting data from page...");
+			const data = await page.evaluate(() => {
+				const getText = (selector: string) => {
+					const el = document.querySelector(selector);
+					return el?.textContent?.trim() || "";
+				};
+
+				const getHtml = (selector: string) => {
+					const el = document.querySelector(selector);
+					return el?.innerHTML?.trim() || "";
+				};
+
+				const getNextTdText = (thText: string) => {
+					const ths = Array.from(document.querySelectorAll("th"));
+					const th = ths.find((el) => el.textContent?.includes(thText));
+					if (th) {
+						const td = th.nextElementSibling;
+						return td?.textContent?.trim() || "";
+					}
+					return "";
+				};
+
+				const title = getText("h1").split("\n")[0].trim();
+				const isHidden = title === "非公開のお仕事";
+				// Check if recruiting by looking for the end recruitment text
+				const spans = Array.from(document.querySelectorAll("span"));
+				const isRecruiting = !spans.some(span => 
+					span.textContent?.includes("このお仕事の募集は終了しています。")
+				);
+				const hasFixedWage = !!getNextTdText("固定報酬制");
+
+				const result = {
+					title,
+					isHidden,
+					category: getText(".subtitle>a"),
+					fixedBudgetText: getNextTdText("固定報酬制"),
+					hourlyBudgetText: getNextTdText("時間単価制"),
+					deliveryDateText: getNextTdText("納品希望日"),
+					recruitingLimitText: getNextTdText("応募期限"),
+					publicationDateText: getNextTdText("掲載日"),
+					workingTimeText: getNextTdText("稼働時間/週"),
+					periodText: getNextTdText("期間"),
+					description: getHtml(".confirm_outside_link"),
+					isRecruiting,
+					hasFixedWage,
+				};
+				return result;
+			});
+
+			console.log(
+				"[CrowdWorksCrawler] Raw data extracted:",
+				JSON.stringify(data, null, 2),
+			);
+
+			if (data.isHidden) {
+				return {
+					platform: Platform.CrowdWorks,
+					projectId,
+					hidden: true,
+				};
+			}
+
+			console.log("[CrowdWorksCrawler] Processing dates...");
+			const recruitingLimit = toDate(data.recruitingLimitText);
+			const publicationDate = toDate(data.publicationDateText);
+
+			const wageType = data.hasFixedWage ? WageType.Fixed : WageType.Time;
+			console.log(`[CrowdWorksCrawler] Wage type: ${wageType}`);
+
+			const projectVisible: ProjectVisible = {
 				platform: Platform.CrowdWorks,
 				projectId,
-				hidden: true,
+				hidden: false,
+				title: data.title,
+				recruitingLimit,
+				category: data.category,
+				description: data.description,
+				publicationDate,
+				isRecruiting: data.isRecruiting,
 			};
-		}
-		const category = $(".subtitle>a").text().trim();
-		const budget = rawBudgetToBudget(
-			$('th:contains("固定報酬制")').next("td").text().trim(),
-		);
 
-		const rawDeliveryDate = $('th:contains("納品希望日")')
-			.next("td")
-			.text()
-			.trim();
-		const deliveryDate =
-			rawDeliveryDate === "-" || rawDeliveryDate === ""
-				? undefined
-				: toDate(rawDeliveryDate);
+			if (wageType === WageType.Fixed) {
+				console.log("[CrowdWorksCrawler] Processing fixed wage project...");
+				const budget = rawBudgetToBudget(data.fixedBudgetText);
+				const rawDeliveryDate = data.deliveryDateText;
+				const deliveryDate =
+					rawDeliveryDate === "-" || rawDeliveryDate === ""
+						? undefined
+						: toDate(rawDeliveryDate);
 
-		const recruitingLimit = toDate(
-			$('th:contains("応募期限")').next("td").text().trim(),
-		);
-		const publicationDate = toDate(
-			$('th:contains("掲載日")').next("td").text().trim(),
-		);
-		const description = $(".confirm_outside_link").html()?.trim();
-		const isRecruiting = !$(
-			'span:contains("このお仕事の募集は終了しています。")',
-		).text();
-		const wageType = $('th:contains("固定報酬制")').text().trim()
-			? WageType.Fixed
-			: WageType.Time;
-		const projectVisible: ProjectVisible = {
-			platform: Platform.CrowdWorks,
-			projectId,
-			hidden: false,
-			title,
-			url,
-			recruitingLimit,
-			category,
-			description,
-			publicationDate,
-			isRecruiting,
-		};
+				return {
+					wageType: WageType.Fixed,
+					budget,
+					deliveryDate,
+					...projectVisible,
+				};
+			}
 
-		if (wageType === WageType.Fixed) {
+			console.log("[CrowdWorksCrawler] Processing hourly wage project...");
+			const hourlyBudget = rawHourlyBudgetToBudget(data.hourlyBudgetText);
+			const workingTime = toWorkingTime(data.workingTimeText);
+			const period = toPeriod(data.periodText);
+
 			return {
-				wageType: WageType.Fixed,
-				budget,
-				deliveryDate,
+				wageType: WageType.Time,
+				hourlyBudget,
+				workingTime,
+				period,
 				...projectVisible,
 			};
+		} catch (error) {
+			console.error(
+				`[CrowdWorksCrawler] Error scraping detail page: ${error instanceof Error ? error.message : error}`,
+			);
+			console.error(`[CrowdWorksCrawler] Failed on project: ${projectId}`);
+			throw error;
+		} finally {
+			if (page) {
+				await page.close();
+			}
 		}
-
-		const hourlyBudget = rawHourlyBudgetToBudget(
-			$('th:contains("時間単価制")').next("td").text().trim(),
-		);
-
-		const workingTime = toWorkingTime(
-			$('th:contains("稼働時間/週")').next("td").text().trim(),
-		);
-		const period = toPeriod($('th:contains("期間")').next("td").text().trim());
-		return {
-			wageType: WageType.Time,
-			hourlyBudget,
-			workingTime,
-			period,
-			...projectVisible,
-		};
 	}
 }
