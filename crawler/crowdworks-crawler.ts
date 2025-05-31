@@ -180,14 +180,7 @@ export class CrowdWorksCrawler implements Crawler {
 		try {
 			page = await this.browser.newPage();
 			console.log("[CrowdWorksCrawler] Navigating to detail page...");
-			await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
-
-			console.log("[CrowdWorksCrawler] Page loaded, waiting for content...");
-			// Wait for main content to load
-			await page.waitForSelector("h1", { timeout: 30000 });
-
-			// Additional wait to ensure content is rendered
-			await page.waitForTimeout(2000);
+			await page.goto(url, { timeout: 60000 });
 
 			console.log("[CrowdWorksCrawler] Extracting data from page...");
 			const data = await page.evaluate(() => {
@@ -211,12 +204,11 @@ export class CrowdWorksCrawler implements Crawler {
 					return "";
 				};
 
-				const title = getText("h1").split("\n")[0].trim();
-				const isHidden = title === "非公開のお仕事";
-				// Check if recruiting by looking for the end recruitment text
+				const title = document.title.split("| 在宅")[0].trim();
+				const isHidden = title.includes("非公開のお仕事"); // Check if recruiting by looking for the end recruitment text
 				const spans = Array.from(document.querySelectorAll("span"));
-				const isRecruiting = !spans.some(span => 
-					span.textContent?.includes("このお仕事の募集は終了しています。")
+				const isRecruiting = !spans.some((span) =>
+					span.textContent?.includes("このお仕事の募集は終了しています。"),
 				);
 				const hasFixedWage = !!getNextTdText("固定報酬制");
 
