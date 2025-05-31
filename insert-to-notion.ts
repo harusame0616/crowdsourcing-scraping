@@ -1,4 +1,6 @@
 import { Client } from "@notionhq/client";
+import coconalaProjects from "./coconala-projects.json";
+import crowdworksProjects from "./crowdworks-projects.json";
 
 interface Budget {
 	min?: number;
@@ -6,7 +8,7 @@ interface Budget {
 }
 
 interface ProjectData {
-	projectId?: string;
+	projectId?: string | number;
 	platform?: string;
 	hidden?: boolean;
 	wageType?: string;
@@ -41,27 +43,175 @@ class NotionProjectManager {
 	}
 
 	/**
-	 * プロジェクトデータをNotionデータベースに書き込む
-	 * @param projectData - プロジェクトデータ
+	 * descriptionを適切なブロックに分割
+	 * - 単一の<br>は改行(\n)に変換
+	 * - 連続する<br>は新しいブロックとして分割
+	 * - 2000文字を超える場合は新しいブロックに分割
 	 */
-	async addProject(projectData: ProjectData): Promise<any> {
-		try {
-			const properties = this.buildNotionProperties(projectData);
+	private formatDescriptionBlocks(description: string): Array<{ object: 'block', type: 'paragraph', paragraph: { rich_text: Array<{ type: 'text', text: { content: string } }> } }> {
+		const blocks: Array<{ object: 'block', type: 'paragraph', paragraph: { rich_text: Array<{ type: 'text', text: { content: string } }> } }> = [];
+		
+		// 連続する<br>で分割（2つ以上の<br>を区切りとする）
+		const paragraphs = description.split(/(?:<br\s*\/?>\s*){2,}/g);
+		
+		for (const paragraph of paragraphs) {
+			if (!paragraph.trim()) continue;
+			
+			// 単一の<br>を改行に変換
+			let formattedText = paragraph.replace(/<br\s*\/?>/g, '\n').trim();
+			
+			// 2000文字を超える場合は分割
+			if (formattedText.length <= 2000) {
+				blocks.push({
+					object: 'block' as const,
+					type: 'paragraph' as const,
+					paragraph: {
+						rich_text: [{
+							type: 'text' as const,
+							text: {
+								content: formattedText
+							}
+						}]
+					}
+				});
+			} else {
+				// 2000文字ごとに分割
+				let currentIndex = 0;
+				while (currentIndex < formattedText.length) {
+					const chunk = formattedText.slice(currentIndex, currentIndex + 2000);
+					blocks.push({
+						object: 'block' as const,
+						type: 'paragraph' as const,
+						paragraph: {
+							rich_text: [{
+								type: 'text' as const,
+								text: {
+									content: chunk
+								}
+							}]
+						}
+					});
+					currentIndex += 2000;
+				}
+			}
+		}
+		
+		return blocks;
+	}
 
-			const response = await this.notion.pages.create({
-				parent: { database_id: this.databaseId },
-				properties: properties,
+	/**
+	 * プロジェクトIDとプラットフォームで既存のページを検索
+	 * @param projectId - プロジェクトID
+	 * @param platform - プラットフォーム名
+	 */
+	async findExistingPage(projectId: string, platform: string): Promise<any | null> {
+		try {
+			const response = await this.notion.databases.query({
+				database_id: this.databaseId,
+				filter: {
+					and: [
+						{
+							property: "プロジェクトID",
+							number: {
+								equals: Number.parseInt(projectId),
+							},
+						},
+						{
+							property: "プラットフォーム",
+							select: {
+								equals: platform,
+							},
+						},
+					],
+				},
 			});
 
-			console.log("✅ プロジェクトが正常に追加されました:", response.id);
-			return response;
+			return response.results.length > 0 ? response.results[0] : null;
+		} catch (error) {
+			console.error("検索エラー:", (error as Error).message);
+			return null;
+		}
+	}
+
+	/**
+	 * プロジェクトデータをNotionデータベースにupsert（存在すれば更新、なければ作成）
+	 * @param projectData - プロジェクトデータ
+	 */
+	async upsertProject(projectData: ProjectData): Promise<any> {
+		try {
+			if (!projectData.projectId || !projectData.platform) {
+				throw new Error("プロジェクトIDとプラットフォームは必須です");
+			}
+
+			const properties = this.buildNotionProperties(projectData);
+			const existingPage = await this.findExistingPage(projectData.projectId, projectData.platform);
+
+			if (existingPage) {
+				// 既存のページを更新
+				const response = await this.notion.pages.update({
+					page_id: existingPage.id,
+					properties: properties,
+				});
+				
+				// 詳細説明を本文として追加/更新
+				// まず既存のブロックを取得
+				if (projectData.description) {
+					try {
+						const blocks = await this.notion.blocks.children.list({
+							block_id: existingPage.id,
+						});
+						
+						// 既存のブロックをすべて削除
+						for (const block of blocks.results) {
+							if ('id' in block) {
+								await this.notion.blocks.delete({ block_id: block.id });
+							}
+						}
+						
+						// 新しいブロックを追加
+						const descriptionBlocks = this.formatDescriptionBlocks(projectData.description);
+						await this.notion.blocks.children.append({
+							block_id: existingPage.id,
+							children: descriptionBlocks
+						});
+					} catch (error) {
+						console.warn("本文の更新に失敗しました:", (error as Error).message);
+					}
+				}
+				
+				console.log(`✅ プロジェクトが更新されました: ${projectData.title || projectData.projectId}`);
+				return response;
+			} else {
+				// 新規ページを作成
+				const createData: any = {
+					parent: { database_id: this.databaseId },
+					properties: properties,
+				};
+				
+				// 詳細説明を本文として追加
+				if (projectData.description) {
+					createData.children = this.formatDescriptionBlocks(projectData.description);
+				}
+				
+				const response = await this.notion.pages.create(createData);
+				console.log(`✅ プロジェクトが追加されました: ${projectData.title || projectData.projectId}`);
+				return response;
+			}
 		} catch (error) {
 			console.error(
-				"❌ プロジェクトの追加に失敗しました:",
+				"❌ プロジェクトのupsertに失敗しました:",
 				(error as Error).message,
 			);
 			throw error;
 		}
+	}
+
+	/**
+	 * プロジェクトデータをNotionデータベースに書き込む（後方互換性のため残す）
+	 * @param projectData - プロジェクトデータ
+	 */
+	async addProject(projectData: ProjectData): Promise<any> {
+		return this.upsertProject(projectData);
 	}
 
 	/**
@@ -165,18 +315,7 @@ class NotionProjectManager {
 			};
 		}
 
-		// 詳細説明
-		if (data.description) {
-			properties["詳細説明"] = {
-				rich_text: [
-					{
-						text: {
-							content: data.description,
-						},
-					},
-				],
-			};
-		}
+		// 詳細説明は本文に含めるため、プロパティには含めない
 
 		// 公開日
 		if (data.publicationDate) {
@@ -198,18 +337,32 @@ class NotionProjectManager {
 	}
 
 	/**
-	 * 複数のプロジェクトを一括で追加
+	 * 複数のプロジェクトを一括でupsert
 	 * @param projectsArray - プロジェクトデータの配列
 	 */
-	async addMultipleProjects(
+	async upsertMultipleProjects(
 		projectsArray: ProjectData[],
 	): Promise<AddProjectResult[]> {
 		const results: AddProjectResult[] = [];
+		let created = 0;
+		let updated = 0;
 
 		for (const project of projectsArray) {
 			try {
-				const result = await this.addProject(project);
+				if (!project.projectId || !project.platform) {
+					console.warn("プロジェクトIDまたはプラットフォームが不足:", project.title || "タイトルなし");
+					continue;
+				}
+				
+				const existingPage = await this.findExistingPage(project.projectId, project.platform);
+				const result = await this.upsertProject(project);
 				results.push({ success: true, data: result });
+				
+				if (existingPage) {
+					updated++;
+				} else {
+					created++;
+				}
 
 				// API制限を考慮して少し待機
 				await new Promise((resolve) => setTimeout(resolve, 100));
@@ -223,13 +376,23 @@ class NotionProjectManager {
 		}
 
 		console.log(
-			`\n📊 処理結果: ${results.filter((r) => r.success).length}件成功 / ${results.filter((r) => !r.success).length}件失敗`,
+			`\n📊 処理結果: ${created}件作成 / ${updated}件更新 / ${results.filter((r) => !r.success).length}件失敗`,
 		);
 		return results;
 	}
+
+	/**
+	 * 複数のプロジェクトを一括で追加（後方互換性のため残す）
+	 * @param projectsArray - プロジェクトデータの配列
+	 */
+	async addMultipleProjects(
+		projectsArray: ProjectData[],
+	): Promise<AddProjectResult[]> {
+		return this.upsertMultipleProjects(projectsArray);
+	}
 }
 
-// 使用例
+// JSONファイルからプロジェクトをインポートしてDBを更新
 async function main() {
 	// 環境変数またはここに直接設定
 	const NOTION_TOKEN =
@@ -239,36 +402,24 @@ async function main() {
 
 	const projectManager = new NotionProjectManager(NOTION_TOKEN, DATABASE_ID);
 
-	// サンプルデータ
-	const sampleProject: ProjectData = {
-		projectId: "4234644",
-		platform: "coconala",
-		hidden: false,
-		wageType: "fixed",
-		url: "https://coconala.com/requests/4234644",
-		title: "競馬のレース映像2つを同時視聴したいです。",
-		category: "プログラミング・ソフトウェア",
-		budget: {
-			min: 5000,
-			max: 10000,
-		},
-		deliveryDate: "2025-06-03T15:00:00.000Z",
-		recruitingLimit: "2025-05-29T15:00:00.000Z",
-		description:
-			"【 募集詳細 】\nJRAが公式で出しています映像\n(レース映像とパトロールビデオ)の\n同時視聴をしたいと思っております。\n2分割で観る形で、着順やタイム等は端などに記載。\nまた、動画を観るにあたり2つの動画の始まりには\n多少の時間ズレがございます。その為、音声等で\nそのズレがない形が好ましいです。巻き戻しなども連動出来る仕様が良いと思っております。",
-		publicationDate: "2025-05-26T15:00:00.000Z",
-		isRecruiting: true,
-	};
-
 	try {
-		// 単一プロジェクトの追加
-		await projectManager.addProject(sampleProject);
+		console.log("🔄 プロジェクトのインポートを開始します...");
+		
+		// Coconalaプロジェクトのインポート
+		if (coconalaProjects.length > 0) {
+			console.log(`\n📂 Coconalaプロジェクト: ${coconalaProjects.length}件`);
+			await projectManager.upsertMultipleProjects(coconalaProjects as ProjectData[]);
+		}
 
-		// 複数プロジェクトの追加例
-		// const projects = [sampleProject, anotherProject, ...];
-		// await projectManager.addMultipleProjects(projects);
+		// CrowdWorksプロジェクトのインポート
+		if (crowdworksProjects.length > 0) {
+			console.log(`\n📂 CrowdWorksプロジェクト: ${crowdworksProjects.length}件`);
+			await projectManager.upsertMultipleProjects(crowdworksProjects as ProjectData[]);
+		}
+
+		console.log("\n✅ インポートが完了しました");
 	} catch (error) {
-		console.error("エラーが発生しました:", error);
+		console.error("\n❌ エラーが発生しました:", error);
 	}
 }
 
