@@ -16,7 +16,6 @@ export function IgnoreButton({
 	onIgnoreStart?: () => void;
 	onIgnoreFinish?: () => void;
 }) {
-
 	function handleClick() {
 		startTransition(async () => {
 			onIgnoreStart?.();

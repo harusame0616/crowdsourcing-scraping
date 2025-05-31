@@ -1,4 +1,4 @@
-import * as cheerio from "cheerio";
+import type { Browser } from "playwright";
 import type { Budget, Project } from "../project";
 import { Platform, WageType } from "../project";
 import type { Crawler } from "./crawler";
@@ -47,9 +47,17 @@ function toBudget(rawBudget: string): Budget | undefined {
 
 // 2025年1月1日 -> 2025-01-01
 function jpDateStringToDate(jpDate: string) {
+	console.log(`[DateParser] Input: "${jpDate}"`);
+
+	if (!jpDate || jpDate.trim() === "") {
+		console.log("[DateParser] Empty date string, returning null");
+		return null as any;
+	}
+
 	const m = jpDate.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
 	if (!m) {
-		throw new Error("Invalid date format");
+		console.error(`[DateParser] Failed to parse date: "${jpDate}"`);
+		throw new Error(`Invalid date format: "${jpDate}"`);
 	}
 
 	const [, year, month, day] = m;
@@ -59,86 +67,171 @@ function jpDateStringToDate(jpDate: string) {
 }
 
 export class CoconalaCrawler implements Crawler {
+	constructor(private browser: Browser) {}
+
 	async listProjectUrls(url: string): Promise<string[]> {
+		console.log(
+			`[CoconalaCrawler] Starting to fetch project list from: ${url}`,
+		);
+		let page = null;
 		try {
-			const response = await fetch(url);
+			page = await this.browser.newPage();
+			console.log("[CoconalaCrawler] Navigating to listing page...");
+			await page.goto(url);
 
-			if (!response.ok) {
-				throw new Error(`Failed to fetch page: ${response.status}`);
-			}
+			console.log("[CoconalaCrawler] Page loaded, waiting for content...");
+			// Wait for the specific content to load
+			await page.waitForSelector(".c-searchItem_detailLink", {
+				timeout: 30000,
+			});
 
-			const html = await response.text();
-			const $ = cheerio.load(html);
+			// // Additional wait to ensure content is rendered
+			// await page.waitForTimeout(2000);
 
-			const links: string[] = [];
+			const links = await page.evaluate(() => {
+				const elements = document.querySelectorAll(".c-searchItem_detailLink");
+				return Array.from(elements)
+					.map((el) => (el as HTMLAnchorElement).href)
+					.filter(Boolean)
+					.map((href) => href.replace("https://coconala.com/requests/", ""));
+			});
 
-			const projectId = $(".c-searchItem_detailLink")
-				.map((_, element) => {
-					const relativeUrl = $(element).attr("href");
-					if (!relativeUrl) {
-						throw new Error("relativeUrl is undefined");
-					}
-					return relativeUrl.replace("https://coconala.com/requests/", "");
-				})
-				.get()
-				.filter(Boolean);
-
-			links.push(...projectId);
-
+			console.log(
+				`[CoconalaCrawler] Found ${links.length} projects on this page`,
+			);
 			return links;
 		} catch (error) {
-			console.error(`Error scraping: ${error.message}`);
+			console.error(
+				`Error scraping: ${error instanceof Error ? error.message : error}`,
+			);
 			return [];
+		} finally {
+			if (page) {
+				await page.close();
+			}
 		}
 	}
 
 	async detail(projectId: string): Promise<Project> {
 		const url = `https://coconala.com/requests/${projectId}`;
-		const response = await fetch(url);
-		const html = await response.text();
-		const $ = cheerio.load(html);
+		console.log(
+			`\n[CoconalaCrawler] Fetching details for project: ${projectId}`,
+		);
+		console.log(`[CoconalaCrawler] URL: ${url}`);
+		let page = null;
 
-		const title = $(".c-requestTitle_heading").text().trim();
-		const category = $(".c-requestTitle_category").text().trim();
-		const budget = toBudget(
-			$(".c-requestOutlineRowContent_budget").text().trim(),
-		);
-		const rawDeliveryDate = $(".c-requestOutlineRow_content:nth(1)")
-			.text()
-			.trim();
-		const deliveryDate =
-			rawDeliveryDate === "ご相談"
-				? undefined
-				: jpDateStringToDate(rawDeliveryDate);
-		const recruitingLimit = jpDateStringToDate(
-			$(".c-requestOutlineRowContent_additional>span").text().trim(),
-		);
-		const publicationDate = jpDateStringToDate(
-			$(".c-requestOutlineRowContent_additional")
-				.text()
-				.split("掲載日")[1]
-				.trim(),
-		);
-		const description = $(".c-detailRowContentText").html()?.trim();
-		const isRecruiting = !$(".c-requestOutlineRow_content:nth(2)")
-			.text()
-			.trim()
-			.includes("募集終了");
+		try {
+			page = await this.browser.newPage();
+			console.log("[CoconalaCrawler] Navigating to detail page...");
+			await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
 
-		return {
-			projectId,
-			platform: Platform.Coconala,
-			hidden: false,
-			wageType: WageType.Fixed,
-			url,
-			title,
-			category,
-			budget,
-			deliveryDate,
-			recruitingLimit,
-			description,
-			publicationDate,
-			isRecruiting,
-		};
+			console.log("[CoconalaCrawler] Page loaded, waiting for content...");
+			// Wait for main content to load
+			await page.waitForSelector(".c-requestTitle_heading", { timeout: 30000 });
+
+			// Additional wait to ensure content is rendered
+			await page.waitForTimeout(2000);
+
+			console.log("[CoconalaCrawler] Extracting data from page...");
+			const data = await page.evaluate(() => {
+				const getText = (selector: string) => {
+					console.log({ selector });
+					const el = document.querySelector(selector);
+					return el?.textContent?.trim() || "";
+				};
+
+				const getHtml = (selector: string) => {
+					console.log({ selector });
+					const el = document.querySelector(selector);
+					return el?.innerHTML?.trim() || "";
+				};
+
+				const result = {
+					title: getText(".c-requestTitle_heading"),
+					category: getText(".c-requestTitle_category"),
+					budgetText:
+						document
+							.querySelectorAll(".c-requestOutlineRow_content")[0]
+							?.textContent?.trim() || "",
+					rawDeliveryDate:
+						document
+							.querySelectorAll(".c-requestOutlineRow_content")[1]
+							?.textContent?.trim() || "",
+					recruitingLimitText:
+						document
+							.querySelector(".c-requestOutlineRowContent_additional")
+							?.textContent?.match(
+								/締切日\s*(\d{4}年\d{1,2}月\d{1,2}日)/,
+							)?.[1] || "",
+					publicationDateText:
+						document
+							.querySelector(".c-requestOutlineRowContent_additional")
+							?.textContent?.match(
+								/掲載日\s*(\d{4}年\d{1,2}月\d{1,2}日)/,
+							)?.[1] || "",
+					description: getHtml(".c-detailRowContentText"),
+					recruitingStatusText: document
+						.querySelectorAll(".c-requestOutlineRow_content")[2]
+						?.textContent?.includes("日")
+						? "募集中"
+						: "募集終了",
+				};
+				return result;
+			});
+
+			console.log(
+				"[CoconalaCrawler] Raw data extracted:",
+				JSON.stringify(data, null, 2),
+			);
+
+			console.log("[CoconalaCrawler] Processing budget...");
+			const budget = toBudget(data.budgetText);
+			console.log(`[CoconalaCrawler] Budget: ${JSON.stringify(budget)}`);
+
+			console.log("[CoconalaCrawler] Processing delivery date...");
+			const deliveryDate =
+				data.rawDeliveryDate === "ご相談"
+					? undefined
+					: jpDateStringToDate(data.rawDeliveryDate);
+
+			console.log("[CoconalaCrawler] Processing recruiting limit...");
+			const recruitingLimit = jpDateStringToDate(data.recruitingLimitText);
+
+			console.log("[CoconalaCrawler] Processing publication date...");
+			const publicationDate = jpDateStringToDate(data.publicationDateText);
+
+			const isRecruiting = !data.recruitingStatusText.includes("募集終了");
+			console.log(`[CoconalaCrawler] Is recruiting: ${isRecruiting}`);
+
+			const result = {
+				projectId,
+				platform: Platform.Coconala,
+				hidden: false,
+				wageType: WageType.Fixed,
+				title: data.title,
+				category: data.category,
+				budget,
+				deliveryDate,
+				recruitingLimit,
+				description: data.description,
+				publicationDate,
+				isRecruiting,
+			};
+
+			console.log(
+				`[CoconalaCrawler] Successfully extracted project: ${projectId}`,
+			);
+			return result;
+		} catch (error) {
+			console.error(
+				`[CoconalaCrawler] Error scraping detail page: ${error instanceof Error ? error.message : error}`,
+			);
+			console.error(`[CoconalaCrawler] Failed on project: ${projectId}`);
+			throw error;
+		} finally {
+			if (page) {
+				await page.close();
+			}
+		}
 	}
 }
