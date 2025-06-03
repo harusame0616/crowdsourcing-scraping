@@ -1,0 +1,45 @@
+name: update project list
+
+on:
+  schedule:
+    - cron: "0 21,3,9 * * *" # JST 6:00, 12:00, 18:00 (UTC 21:00, 3:00, 9:00)
+  workflow_dispatch:
+
+env:
+  NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+
+concurrency:
+  group: crawl-and-insert
+  cancel-in-progress: false
+
+jobs:
+  crawl-and-update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: ????????????
+        uses: actions/checkout@v4
+
+      - name: pnpm ??????
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Node.js ??????
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: ???????????
+        run: pnpm install
+
+      - name: Playwright ??????
+        run: pnpm exec playwright install
+
+      - name: ??????
+        run: pnpm dlx tsx ./crawl.ts
+
+      - name: ?????
+        run: pnpm dlx tsx ./insert-to-notion.ts
