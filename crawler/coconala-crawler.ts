@@ -69,152 +69,146 @@ function jpDateStringToDate(jpDate: string) {
 export class CoconalaCrawler implements Crawler {
 	constructor(private browser: Browser) {}
 
-	async listProjectUrls(url: string): Promise<string[]> {
-		let page = null;
-
-		try {
-			page = await this.browser.newPage();
-			console.log(`[Coconala] 一覧ページ表示 ${url}`);
-			await page.goto(url);
-
-			const titlesLocator = page.locator(".c-itemInfo_title");
-			const noHitLocator = page.getByText(
-				"該当する仕事が見つかりませんでした。",
-			);
-
-			console.log("[Coconala] 一覧もしくはヒットなしメッセージ待ち");
-			await Promise.race([
-				titlesLocator.first().waitFor({ state: "visible" }).catch(),
-				noHitLocator.waitFor({ state: "visible" }).catch(),
-			]);
-
-			if (await noHitLocator.isVisible()) {
-				console.log("[Coconala] ヒットなし");
-				return [];
-			}
-
-			console.log("[Coconala] プロジェクト ID 取得開始");
-			const titleLocators = await titlesLocator.all();
-			return await Promise.all(
-				titleLocators.map(async (titleLocator) => {
-					const href = await titleLocator
-						.getByRole("link")
-						.getAttribute("href");
-
-					if (href === null) {
-						throw new Error("href is null");
-					}
-
-					const projectId = href.replace("https://coconala.com/requests/", "");
-					console.log(
-						`[Coconala] プロジェクト ID 取得完了: ${href} -> ${projectId}`,
-					);
-
-					return projectId;
-				}),
-			);
-		} finally {
-			if (page) {
+	private async createPageResource() {
+		const page = await this.browser.newPage();
+		return {
+			page,
+			[Symbol.asyncDispose]: async () => {
 				await page.close();
 			}
+		};
+	}
+
+	async listProjectUrls(url: string): Promise<string[]> {
+		await using pageResource = await this.createPageResource();
+		const { page } = pageResource;
+
+		console.log(`[Coconala] 一覧ページ表示 ${url}`);
+		await page.goto(url);
+
+		const titlesLocator = page.locator(".c-itemInfo_title");
+		const noHitLocator = page.getByText(
+			"該当する仕事が見つかりませんでした。",
+		);
+
+		console.log("[Coconala] 一覧もしくはヒットなしメッセージ待ち");
+		await Promise.race([
+			titlesLocator.first().waitFor({ state: "visible" }).catch(),
+			noHitLocator.waitFor({ state: "visible" }).catch(),
+		]);
+
+		if (await noHitLocator.isVisible()) {
+			console.log("[Coconala] ヒットなし");
+			return [];
 		}
+
+		console.log("[Coconala] プロジェクト ID 取得開始");
+		const titleLocators = await titlesLocator.all();
+		return await Promise.all(
+			titleLocators.map(async (titleLocator) => {
+				const href = await titleLocator
+					.getByRole("link")
+					.getAttribute("href");
+
+				if (href === null) {
+					throw new Error("href is null");
+				}
+
+				const projectId = href.replace("https://coconala.com/requests/", "");
+				console.log(
+					`[Coconala] プロジェクト ID 取得完了: ${href} -> ${projectId}`,
+				);
+
+				return projectId;
+			}),
+		);
 	}
 
 	async detail(projectId: string): Promise<Project> {
 		const url = `https://coconala.com/requests/${projectId}`;
 
-		let page = null;
-		try {
-			page = await this.browser.newPage();
+		await using pageResource = await this.createPageResource();
+		const { page } = pageResource;
 
-			console.log(`[Coconala] 詳細ページ表示 ${url}`);
-			await page.goto(url);
+		console.log(`[Coconala] 詳細ページ表示 ${url}`);
+		await page.goto(url);
 
-			const titleText = await page
-				.locator(".c-requestTitle_heading")
-				.textContent();
-			console.log(`[Coconala] タイトル: ${titleText}`);
+		const titleText = await page
+			.locator(".c-requestTitle_heading")
+			.textContent();
+		console.log(`[Coconala] タイトル: ${titleText}`);
 
-			const categoryText = await page
-				.locator(".c-requestTitle_category")
-				.textContent();
-			console.log(`[Coconala] カテゴリ: ${categoryText}`);
+		const categoryText = await page
+			.locator(".c-requestTitle_category")
+			.textContent();
+		console.log(`[Coconala] カテゴリ: ${categoryText}`);
 
-			const requestRows = page.locator(".c-requestOutlineRow");
+		const requestRows = page.locator(".c-requestOutlineRow");
 
-			const budgetText = await requestRows
-				.filter({ hasText: "予算" })
-				.locator(".c-requestOutlineRow_content")
-				.textContent()
-				.then((text) => text?.trim());
-			console.log(`[Coconala] 予算: ${budgetText}`);
+		const budgetText = await requestRows
+			.filter({ hasText: "予算" })
+			.locator(".c-requestOutlineRow_content")
+			.textContent()
+			.then((text) => text?.trim());
+		console.log(`[Coconala] 予算: ${budgetText}`);
 
-			const deliveryDateText = await requestRows
-				.filter({ hasText: "納品希望日" })
-				.locator(".c-requestOutlineRow_content")
-				.innerText();
-			console.log(`[Coconala] 納品期日: ${deliveryDateText}`);
+		const deliveryDateText = await requestRows
+			.filter({ hasText: "納品希望日" })
+			.locator(".c-requestOutlineRow_content")
+			.innerText();
+		console.log(`[Coconala] 納品期日: ${deliveryDateText}`);
 
-			const recruitingLimitText = await requestRows
-				.filter({ hasText: "募集期限" })
-				.locator(".c-requestOutlineRowContent_additional")
-				.textContent()
-				.then(
-					(text) => text?.match(/締切日\s*(\d{4}年\d{1,2}月\d{1,2}日)/)?.[1],
-				);
-			console.log(`[Coconala] 締切日: ${recruitingLimitText}`);
+		const recruitingLimitText = await requestRows
+			.filter({ hasText: "募集期限" })
+			.locator(".c-requestOutlineRowContent_additional")
+			.textContent()
+			.then(
+				(text) => text?.match(/締切日\s*(\d{4}年\d{1,2}月\d{1,2}日)/)?.[1],
+			);
+		console.log(`[Coconala] 締切日: ${recruitingLimitText}`);
 
-			const publicationDateText = await requestRows
-				.filter({ hasText: "掲載日" })
-				.locator(".c-requestOutlineRowContent_additional")
-				.textContent()
-				.then(
-					(text) => text?.match(/掲載日\s*(\d{4}年\d{1,2}月\d{1,2}日)/)?.[1],
-				);
-			console.log(`[Coconala] 掲載日: ${publicationDateText}`);
+		const publicationDateText = await requestRows
+			.filter({ hasText: "掲載日" })
+			.locator(".c-requestOutlineRowContent_additional")
+			.textContent()
+			.then(
+				(text) => text?.match(/掲載日\s*(\d{4}年\d{1,2}月\d{1,2}日)/)?.[1],
+			);
+		console.log(`[Coconala] 掲載日: ${publicationDateText}`);
 
-			const description = await page
-				.locator(".c-detailRowContentText")
-				.innerHTML();
-			console.log(`[Coconala] 説明: ${description}`);
+		const description = await page
+			.locator(".c-detailRowContentText")
+			.innerHTML();
+		console.log(`[Coconala] 説明: ${description}`);
 
-			const budget = toBudget(budgetText || "");
-			console.log(`[Coconala] Budget: ${JSON.stringify(budget)}`);
+		const budget = toBudget(budgetText || "");
+		console.log(`[Coconala] Budget: ${JSON.stringify(budget)}`);
 
-			const deliveryDate =
-				deliveryDateText === "ご相談"
-					? undefined
-					: jpDateStringToDate(deliveryDateText || "");
+		const deliveryDate =
+			deliveryDateText === "ご相談"
+				? undefined
+				: jpDateStringToDate(deliveryDateText || "");
 
-			const recruitingLimit = jpDateStringToDate(recruitingLimitText || "");
+		const recruitingLimit = jpDateStringToDate(recruitingLimitText || "");
 
-			const publicationDate = jpDateStringToDate(publicationDateText || "");
-			if (publicationDate === null) {
-				throw new Error(`[Coconala] 掲載日が不正です: ${publicationDateText}`);
-			}
-
-			return {
-				projectId,
-				platform: Platform.Coconala,
-				hidden: false as const,
-				wageType: WageType.Fixed,
-				title: titleText?.trim() || "",
-				category: categoryText?.trim() || "",
-				budget,
-				deliveryDate: deliveryDate || undefined,
-				recruitingLimit: recruitingLimit || null,
-				description: description.trim(),
-				publicationDate,
-				isRecruiting: true,
-			};
-		} catch (error) {
-			console.error(`[Coconala] Error scraping detail page: ${error}`);
-			console.error(`[Coconala] Failed on project: ${projectId}`);
-			throw error;
-		} finally {
-			if (page) {
-				await page.close();
-			}
+		const publicationDate = jpDateStringToDate(publicationDateText || "");
+		if (publicationDate === null) {
+			throw new Error(`[Coconala] 掲載日が不正です: ${publicationDateText}`);
 		}
+
+		return {
+			projectId,
+			platform: Platform.Coconala,
+			hidden: false as const,
+			wageType: WageType.Fixed,
+			title: titleText?.trim() || "",
+			category: categoryText?.trim() || "",
+			budget,
+			deliveryDate: deliveryDate || undefined,
+			recruitingLimit: recruitingLimit || null,
+			description: description.trim(),
+			publicationDate,
+			isRecruiting: true,
+		};
 	}
 }

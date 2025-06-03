@@ -52,7 +52,7 @@ function toWorkingTime(rawWorkingHours: string): WorkingTime | undefined {
 	const [time, unit] = rawWorkingHours.split("/");
 
 	return {
-		unit: unit === "週" ? "Weekly" : "Monthly",
+		unit: unit === "週" ? "week" : "month",
 		time: Number.parseInt(time),
 	};
 }
@@ -119,38 +119,45 @@ function toDate(jpDateStr: string) {
 
 export class CrowdWorksCrawler implements Crawler {
 	constructor(private browser: Browser) {}
-	async listProjectUrls(url: string): Promise<string[]> {
-		console.log(`[CrowdWorksCrawler] プロジェクト一覧を取得します: ${url}`);
-		let page = null;
-		try {
-			page = await this.browser.newPage();
-			console.log("[CrowdWorksCrawler] 一覧ページに移動中...");
-			await page.goto(url);
-
-			console.log("[CrowdWorksCrawler] Vueコンテナの読み込みを待機中...");
-			const container = await page.locator("#vue-container");
-			await container.waitFor({
-				timeout: 30000,
-			});
-			const dataAttr = await container.getAttribute("data");
-			if (!dataAttr) {
-				throw new Error("data 属性が見つかりません");
-			}
-
-			const data = JSON.parse(dataAttr);
-			const jobIds = data.searchResult.job_offers.map(
-				({ job_offer }: any) => job_offer.id,
-			);
-
-			console.log(
-				`[CrowdWorksCrawler] ${jobIds.length}件のプロジェクトを取得しました`,
-			);
-			return jobIds;
-		} finally {
-			if (page) {
+	
+	private async createPageResource() {
+		const page = await this.browser.newPage();
+		return {
+			page,
+			[Symbol.asyncDispose]: async () => {
 				await page.close();
 			}
+		};
+	}
+	
+	async listProjectUrls(url: string): Promise<string[]> {
+		console.log(`[CrowdWorksCrawler] プロジェクト一覧を取得します: ${url}`);
+		
+		await using pageResource = await this.createPageResource();
+		const { page } = pageResource;
+
+		console.log("[CrowdWorksCrawler] 一覧ページに移動中...");
+		await page.goto(url);
+
+		console.log("[CrowdWorksCrawler] Vueコンテナの読み込みを待機中...");
+		const container = await page.locator("#vue-container");
+		await container.waitFor({
+			timeout: 30000,
+		});
+		const dataAttr = await container.getAttribute("data");
+		if (!dataAttr) {
+			throw new Error("data 属性が見つかりません");
 		}
+
+		const data = JSON.parse(dataAttr);
+		const jobIds = data.searchResult.job_offers.map(
+			({ job_offer }: any) => job_offer.id,
+		);
+
+		console.log(
+			`[CrowdWorksCrawler] ${jobIds.length}件のプロジェクトを取得しました`,
+		);
+		return jobIds;
 	}
 
 	async detail(projectId: string): Promise<Project> {
@@ -159,15 +166,15 @@ export class CrowdWorksCrawler implements Crawler {
 			`\n[CrowdWorksCrawler] Fetching details for project: ${projectId}`,
 		);
 		console.log(`[CrowdWorksCrawler] URL: ${url}`);
-		let page = null;
+		
+		await using pageResource = await this.createPageResource();
+		const { page } = pageResource;
 
-		try {
-			page = await this.browser.newPage();
-			console.log("[CrowdWorksCrawler] Navigating to detail page...");
-			await page.goto(url, { timeout: 60000 });
+		console.log("[CrowdWorksCrawler] Navigating to detail page...");
+		await page.goto(url, { timeout: 60000 });
 
-			console.log("[CrowdWorksCrawler] Extracting data from page...");
-			const data = await page.evaluate(() => {
+		console.log("[CrowdWorksCrawler] Extracting data from page...");
+		const data = await page.evaluate(() => {
 				const getText = (selector: string) => {
 					const el = document.querySelector(selector);
 					return el?.textContent?.trim() || "";
@@ -275,16 +282,5 @@ export class CrowdWorksCrawler implements Crawler {
 				period,
 				...projectVisible,
 			};
-		} catch (error) {
-			console.error(
-				`[CrowdWorksCrawler] Error scraping detail page: ${error instanceof Error ? error.message : error}`,
-			);
-			console.error(`[CrowdWorksCrawler] Failed on project: ${projectId}`);
-			throw error;
-		} finally {
-			if (page) {
-				await page.close();
-			}
-		}
 	}
 }
