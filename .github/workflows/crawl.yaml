@@ -36,7 +36,7 @@ jobs:
         run: pnpm install
 
       - name: Playwright インストール
-        run: pnpm exec playwright install
+        run: pnpm exec playwright install --with-deps
 
       - name: クローリング
         run: pnpm dlx tsx ./crawl.ts
