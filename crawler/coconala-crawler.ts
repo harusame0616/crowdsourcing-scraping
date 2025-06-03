@@ -51,7 +51,7 @@ function jpDateStringToDate(jpDate: string) {
 
 	if (!jpDate || jpDate.trim() === "") {
 		console.log("[DateParser] Empty date string, returning null");
-		return null as any;
+		return null;
 	}
 
 	const m = jpDate.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
@@ -84,8 +84,8 @@ export class CoconalaCrawler implements Crawler {
 
 			console.log("[Coconala] 一覧もしくはヒットなしメッセージ待ち");
 			await Promise.race([
-				titlesLocator.first().waitFor({ state: "visible" }),
-				noHitLocator.waitFor({ state: "visible" }),
+				titlesLocator.first().waitFor({ state: "visible" }).catch(),
+				noHitLocator.waitFor({ state: "visible" }).catch(),
 			]);
 
 			if (await noHitLocator.isVisible()) {
@@ -94,8 +94,9 @@ export class CoconalaCrawler implements Crawler {
 			}
 
 			console.log("[Coconala] プロジェクト ID 取得開始");
+			const titleLocators = await titlesLocator.all();
 			return await Promise.all(
-				(await titlesLocator.all()).map(async (titleLocator) => {
+				titleLocators.map(async (titleLocator) => {
 					const href = await titleLocator
 						.getByRole("link")
 						.getAttribute("href");
@@ -103,8 +104,11 @@ export class CoconalaCrawler implements Crawler {
 					if (href === null) {
 						throw new Error("href is null");
 					}
+
 					const projectId = href.replace("https://coconala.com/requests/", "");
-					console.log(`[Coconala] プロジェクト ID 取得完了: ${projectId}`);
+					console.log(
+						`[Coconala] プロジェクト ID 取得完了: ${href} -> ${projectId}`,
+					);
 
 					return projectId;
 				}),
@@ -118,119 +122,94 @@ export class CoconalaCrawler implements Crawler {
 
 	async detail(projectId: string): Promise<Project> {
 		const url = `https://coconala.com/requests/${projectId}`;
-		console.log(
-			`\n[CoconalaCrawler] Fetching details for project: ${projectId}`,
-		);
-		console.log(`[CoconalaCrawler] URL: ${url}`);
-		let page = null;
 
+		let page = null;
 		try {
 			page = await this.browser.newPage();
-			console.log("[CoconalaCrawler] Navigating to detail page...");
-			await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
 
-			console.log("[CoconalaCrawler] Page loaded, waiting for content...");
-			// Wait for main content to load
-			await page.waitForSelector(".c-requestTitle_heading", { timeout: 30000 });
+			console.log(`[Coconala] 詳細ページ表示 ${url}`);
+			await page.goto(url);
 
-			// Additional wait to ensure content is rendered
-			await page.waitForTimeout(2000);
+			const titleText = await page
+				.locator(".c-requestTitle_heading")
+				.textContent();
+			console.log(`[Coconala] タイトル: ${titleText}`);
 
-			console.log("[CoconalaCrawler] Extracting data from page...");
-			const data = await page.evaluate(() => {
-				const getText = (selector: string) => {
-					console.log({ selector });
-					const el = document.querySelector(selector);
-					return el?.textContent?.trim() || "";
-				};
+			const categoryText = await page
+				.locator(".c-requestTitle_category")
+				.textContent();
+			console.log(`[Coconala] カテゴリ: ${categoryText}`);
 
-				const getHtml = (selector: string) => {
-					console.log({ selector });
-					const el = document.querySelector(selector);
-					return el?.innerHTML?.trim() || "";
-				};
+			const requestRows = page.locator(".c-requestOutlineRow");
 
-				const result = {
-					title: getText(".c-requestTitle_heading"),
-					category: getText(".c-requestTitle_category"),
-					budgetText:
-						document
-							.querySelectorAll(".c-requestOutlineRow_content")[0]
-							?.textContent?.trim() || "",
-					rawDeliveryDate:
-						document
-							.querySelectorAll(".c-requestOutlineRow_content")[1]
-							?.textContent?.trim() || "",
-					recruitingLimitText:
-						document
-							.querySelector(".c-requestOutlineRowContent_additional")
-							?.textContent?.match(
-								/締切日\s*(\d{4}年\d{1,2}月\d{1,2}日)/,
-							)?.[1] || "",
-					publicationDateText:
-						document
-							.querySelector(".c-requestOutlineRowContent_additional")
-							?.textContent?.match(
-								/掲載日\s*(\d{4}年\d{1,2}月\d{1,2}日)/,
-							)?.[1] || "",
-					description: getHtml(".c-detailRowContentText"),
-					recruitingStatusText: document
-						.querySelectorAll(".c-requestOutlineRow_content")[2]
-						?.textContent?.includes("日")
-						? "募集中"
-						: "募集終了",
-				};
-				return result;
-			});
+			const budgetText = await requestRows
+				.filter({ hasText: "予算" })
+				.locator(".c-requestOutlineRow_content")
+				.textContent()
+				.then((text) => text?.trim());
+			console.log(`[Coconala] 予算: ${budgetText}`);
 
-			console.log(
-				"[CoconalaCrawler] Raw data extracted:",
-				JSON.stringify(data, null, 2),
-			);
+			const deliveryDateText = await requestRows
+				.filter({ hasText: "納品希望日" })
+				.locator(".c-requestOutlineRow_content")
+				.innerText();
+			console.log(`[Coconala] 納品期日: ${deliveryDateText}`);
 
-			console.log("[CoconalaCrawler] Processing budget...");
-			const budget = toBudget(data.budgetText);
-			console.log(`[CoconalaCrawler] Budget: ${JSON.stringify(budget)}`);
+			const recruitingLimitText = await requestRows
+				.filter({ hasText: "募集期限" })
+				.locator(".c-requestOutlineRowContent_additional")
+				.textContent()
+				.then(
+					(text) => text?.match(/締切日\s*(\d{4}年\d{1,2}月\d{1,2}日)/)?.[1],
+				);
+			console.log(`[Coconala] 締切日: ${recruitingLimitText}`);
 
-			console.log("[CoconalaCrawler] Processing delivery date...");
+			const publicationDateText = await requestRows
+				.filter({ hasText: "掲載日" })
+				.locator(".c-requestOutlineRowContent_additional")
+				.textContent()
+				.then(
+					(text) => text?.match(/掲載日\s*(\d{4}年\d{1,2}月\d{1,2}日)/)?.[1],
+				);
+			console.log(`[Coconala] 掲載日: ${publicationDateText}`);
+
+			const description = await page
+				.locator(".c-detailRowContentText")
+				.innerHTML();
+			console.log(`[Coconala] 説明: ${description}`);
+
+			const budget = toBudget(budgetText || "");
+			console.log(`[Coconala] Budget: ${JSON.stringify(budget)}`);
+
 			const deliveryDate =
-				data.rawDeliveryDate === "ご相談"
+				deliveryDateText === "ご相談"
 					? undefined
-					: jpDateStringToDate(data.rawDeliveryDate);
+					: jpDateStringToDate(deliveryDateText || "");
 
-			console.log("[CoconalaCrawler] Processing recruiting limit...");
-			const recruitingLimit = jpDateStringToDate(data.recruitingLimitText);
+			const recruitingLimit = jpDateStringToDate(recruitingLimitText || "");
 
-			console.log("[CoconalaCrawler] Processing publication date...");
-			const publicationDate = jpDateStringToDate(data.publicationDateText);
+			const publicationDate = jpDateStringToDate(publicationDateText || "");
+			if (publicationDate === null) {
+				throw new Error(`[Coconala] 掲載日が不正です: ${publicationDateText}`);
+			}
 
-			const isRecruiting = !data.recruitingStatusText.includes("募集終了");
-			console.log(`[CoconalaCrawler] Is recruiting: ${isRecruiting}`);
-
-			const result = {
+			return {
 				projectId,
 				platform: Platform.Coconala,
-				hidden: false,
+				hidden: false as const,
 				wageType: WageType.Fixed,
-				title: data.title,
-				category: data.category,
+				title: titleText?.trim() || "",
+				category: categoryText?.trim() || "",
 				budget,
-				deliveryDate,
-				recruitingLimit,
-				description: data.description,
+				deliveryDate: deliveryDate || undefined,
+				recruitingLimit: recruitingLimit || null,
+				description: description.trim(),
 				publicationDate,
-				isRecruiting,
+				isRecruiting: true,
 			};
-
-			console.log(
-				`[CoconalaCrawler] Successfully extracted project: ${projectId}`,
-			);
-			return result;
 		} catch (error) {
-			console.error(
-				`[CoconalaCrawler] Error scraping detail page: ${error instanceof Error ? error.message : error}`,
-			);
-			console.error(`[CoconalaCrawler] Failed on project: ${projectId}`);
+			console.error(`[Coconala] Error scraping detail page: ${error}`);
+			console.error(`[Coconala] Failed on project: ${projectId}`);
 			throw error;
 		} finally {
 			if (page) {
