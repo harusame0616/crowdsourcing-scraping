@@ -70,41 +70,45 @@ export class CoconalaCrawler implements Crawler {
 	constructor(private browser: Browser) {}
 
 	async listProjectUrls(url: string): Promise<string[]> {
-		console.log(
-			`[CoconalaCrawler] Starting to fetch project list from: ${url}`,
-		);
 		let page = null;
+
 		try {
 			page = await this.browser.newPage();
-			console.log("[CoconalaCrawler] Navigating to listing page...");
+			console.log(`[Coconala] 一覧ページ表示 ${url}`);
 			await page.goto(url);
 
-			console.log("[CoconalaCrawler] Page loaded, waiting for content...");
-			// Wait for the specific content to load
-			await page.waitForSelector(".c-searchItem_detailLink", {
-				timeout: 30000,
-			});
-
-			// // Additional wait to ensure content is rendered
-			// await page.waitForTimeout(2000);
-
-			const links = await page.evaluate(() => {
-				const elements = document.querySelectorAll(".c-searchItem_detailLink");
-				return Array.from(elements)
-					.map((el) => (el as HTMLAnchorElement).href)
-					.filter(Boolean)
-					.map((href) => href.replace("https://coconala.com/requests/", ""));
-			});
-
-			console.log(
-				`[CoconalaCrawler] Found ${links.length} projects on this page`,
+			const titlesLocator = page.locator(".c-itemInfo_title");
+			const noHitLocator = page.getByText(
+				"該当する仕事が見つかりませんでした。",
 			);
-			return links;
-		} catch (error) {
-			console.error(
-				`Error scraping: ${error instanceof Error ? error.message : error}`,
+
+			console.log("[Coconala] 一覧もしくはヒットなしメッセージ待ち");
+			await Promise.race([
+				titlesLocator.first().waitFor({ state: "visible" }),
+				noHitLocator.waitFor({ state: "visible" }),
+			]);
+
+			if (await noHitLocator.isVisible()) {
+				console.log("[Coconala] ヒットなし");
+				return [];
+			}
+
+			console.log("[Coconala] プロジェクト ID 取得開始");
+			return await Promise.all(
+				(await titlesLocator.all()).map(async (titleLocator) => {
+					const href = await titleLocator
+						.getByRole("link")
+						.getAttribute("href");
+
+					if (href === null) {
+						throw new Error("href is null");
+					}
+					const projectId = href.replace("https://coconala.com/requests/", "");
+					console.log(`[Coconala] プロジェクト ID 取得完了: ${projectId}`);
+
+					return projectId;
+				}),
 			);
-			return [];
 		} finally {
 			if (page) {
 				await page.close();
