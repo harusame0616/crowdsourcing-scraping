@@ -120,48 +120,32 @@ function toDate(jpDateStr: string) {
 export class CrowdWorksCrawler implements Crawler {
 	constructor(private browser: Browser) {}
 	async listProjectUrls(url: string): Promise<string[]> {
-		console.log(
-			`[CrowdWorksCrawler] Starting to fetch project list from: ${url}`,
-		);
+		console.log(`[CrowdWorksCrawler] プロジェクト一覧を取得します: ${url}`);
 		let page = null;
 		try {
 			page = await this.browser.newPage();
-			console.log("[CrowdWorksCrawler] Navigating to listing page...");
+			console.log("[CrowdWorksCrawler] 一覧ページに移動中...");
 			await page.goto(url);
 
-			console.log("[CrowdWorksCrawler] Page loaded, waiting for content...");
-			// Wait for the Vue container to load
-			await page.waitForSelector("#vue-container", {
+			console.log("[CrowdWorksCrawler] Vueコンテナの読み込みを待機中...");
+			const container = await page.locator("#vue-container");
+			await container.waitFor({
 				timeout: 30000,
 			});
+			const dataAttr = await container.getAttribute("data");
+			if (!dataAttr) {
+				throw new Error("data 属性が見つかりません");
+			}
 
-			// Additional wait to ensure content is rendered
-			await page.waitForTimeout(2000);
-
-			const jobIds = await page.evaluate(() => {
-				const container = document.querySelector("#vue-container");
-				if (!container) {
-					throw new Error("Vue container not found");
-				}
-				const dataAttr = container.getAttribute("data");
-				if (!dataAttr) {
-					throw new Error("data attribute is undefined");
-				}
-				const data = JSON.parse(dataAttr);
-				return data.searchResult.job_offers.map(
-					({ job_offer }: any) => job_offer.id,
-				);
-			});
+			const data = JSON.parse(dataAttr);
+			const jobIds = data.searchResult.job_offers.map(
+				({ job_offer }: any) => job_offer.id,
+			);
 
 			console.log(
-				`[CrowdWorksCrawler] Found ${jobIds.length} projects on this page`,
+				`[CrowdWorksCrawler] ${jobIds.length}件のプロジェクトを取得しました`,
 			);
 			return jobIds;
-		} catch (error) {
-			console.error(
-				`Error scraping: ${error instanceof Error ? error.message : error}`,
-			);
-			return [];
 		} finally {
 			if (page) {
 				await page.close();
