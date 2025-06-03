@@ -18,28 +18,28 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: ????????????
+      - name: リポジトリチェックアウト
         uses: actions/checkout@v4
 
-      - name: pnpm ??????
+      - name: pnpm セットアップ
         uses: pnpm/action-setup@v2
         with:
           version: 9
 
-      - name: Node.js ??????
+      - name: Node.js セットアップ
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "pnpm"
 
-      - name: ???????????
+      - name: パッケージインストール
         run: pnpm install
 
-      - name: Playwright ??????
+      - name: Playwright インストール
         run: pnpm exec playwright install
 
-      - name: ??????
+      - name: クローリング
         run: pnpm dlx tsx ./crawl.ts
 
-      - name: ?????
+      - name: データ更新
         run: pnpm dlx tsx ./insert-to-notion.ts
