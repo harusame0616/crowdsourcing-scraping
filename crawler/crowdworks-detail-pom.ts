@@ -18,10 +18,7 @@ export class CrowdWorksDetailPOM {
 	}
 
 	async isFixedWageType(): Promise<boolean> {
-		return await this.page
-			.locator(".summary")
-			.getByText("報酬")
-			.isVisible();
+		return await this.page.locator(".summary").getByText("報酬").isVisible();
 	}
 
 	async getCategory(): Promise<string> {
@@ -33,7 +30,10 @@ export class CrowdWorksDetailPOM {
 	}
 
 	async getFixedBudgetText(): Promise<string> {
-		const isVisible = await this.page.getByText("固定報酬制").isVisible();
+		const isVisible = await this.page
+			.locator(".summary")
+			.getByText("固定報酬制")
+			.isVisible();
 		if (!isVisible) return "";
 
 		const text = await this.page
