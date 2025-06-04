@@ -84,9 +84,9 @@ jobs:
         run: pnpm dlx tsx ./crawl.ts ${{ matrix.platform }} "${{ matrix.url }}"
 
       - name: クロール結果をアップロード
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: crawl-results
+          name: crawl-results-${{ matrix.platform }}-${{ strategy.job-index }}
           path: outputs/*.json
           retention-days: 1
 
@@ -114,10 +114,11 @@ jobs:
         run: pnpm install
 
       - name: クロール結果をダウンロード
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: crawl-results
+          pattern: crawl-results-*
           path: outputs
+          merge-multiple: true
 
       - name: outputsフォルダのファイル一覧取得
         id: get-files
