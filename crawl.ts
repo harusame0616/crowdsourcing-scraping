@@ -1,10 +1,11 @@
-import { CrowdWorksCrawler } from "./crawler/crowdworks-crawler";
-import { CoconalaCrawler } from "./crawler/coconala-crawler";
 import { chromium } from "playwright";
 import { setTimeout } from "node:timers/promises";
 import type { Project } from "./project";
 import type { Crawler } from "./crawler/crawler";
+import { getCrawler } from "./crawler/get-crawler";
+import { Platform } from "./project/platform";
 import fs from "node:fs/promises";
+import * as v from "valibot";
 
 class CrawlingUsecase {
 	constructor(
@@ -45,62 +46,37 @@ async function createBrowserResource() {
 }
 
 async function main() {
+	const args = process.argv.slice(2);
+
+	if (args.length !== 2) {
+		process.exit(1);
+	}
+
+	const platform = v.parse(v.enum(Platform), args[0]);
+	const listUrl = v.parse(v.pipe(v.string(), v.url()), args[1]);
+
 	await using browserResource = await createBrowserResource();
 	const { browser } = browserResource;
 
-	const coconalaCrawlUsecase = new CrawlingUsecase(
-		new CoconalaCrawler(browser),
-		[
-			"https://coconala.com/requests/categories/231?ref=header&categoryId=231&page=1&recruiting=true",
-			"https://coconala.com/requests/categories/230?ref=header&categoryId=230&page=1&recruiting=true",
-			"https://coconala.com/requests/categories/232?ref=header&categoryId=232&page=1&recruiting=true",
-			"https://coconala.com/requests/categories/237?ref=header&categoryId=237&page=1&recruiting=true",
-			"https://coconala.com/requests/categories/813?ref=header&categoryId=813&page=1&recruiting=true",
-			"https://coconala.com/requests/categories/239?ref=header&categoryId=239&page=1&recruiting=true",
-			"https://coconala.com/requests/categories/236?ref=header&categoryId=236&page=1&recruiting=true",
-		],
-		{
-			saveMany: async (projects: Project[]) => {
-				await fs.writeFile(
-					"coconala-projects.json",
-					JSON.stringify(projects, null, 2),
-					"utf-8",
-				);
-				console.log(JSON.stringify(projects, null, 2));
-			},
-		},
-	);
+	const crawler = getCrawler(platform, browser);
 
-	const crowdworksCrawlUsecase = new CrawlingUsecase(
-		new CrowdWorksCrawler(browser),
-		[
-			"https://crowdworks.jp/public/jobs/search?category_id=2&order=new",
-			"https://crowdworks.jp/public/jobs/search?category_id=2&order=new&page=2",
-			"https://crowdworks.jp/public/jobs/search?category_id=83&order=new",
-			"https://crowdworks.jp/public/jobs/search?category_id=83&order=new&page=2",
-			"https://crowdworks.jp/public/jobs/search?category_id=282&order=new",
-			"https://crowdworks.jp/public/jobs/search?category_id=173&order=new",
-			"https://crowdworks.jp/public/jobs/search?category_id=78&order=new",
-			"https://crowdworks.jp/public/jobs/search?category_id=346&order=new",
-			"https://crowdworks.jp/public/jobs/search?category_id=347&order=new",
-			"https://crowdworks.jp/public/jobs/search?category_id=348&order=new",
-			"https://crowdworks.jp/public/jobs/search?category_id=269&order=new",
-		],
-		{
-			saveMany: async (projects: Project[]) => {
-				await fs.writeFile(
-					"crowdworks-projects.json",
-					JSON.stringify(projects, null, 2),
-					"utf-8",
-				);
-			},
-		},
-	);
+	const crawlUsecase = new CrawlingUsecase(crawler, [listUrl], {
+		saveMany: async (projects: Project[]) => {
+			const url = new URL(listUrl);
+			const pathPart = url.pathname + url.search;
+			const encodedPath = encodeURIComponent(pathPart);
+			const filename = `${platform}_${encodedPath}.json`;
 
-	await Promise.all([
-		coconalaCrawlUsecase.execute(),
-		crowdworksCrawlUsecase.execute(),
-	]);
+			await fs.writeFile(
+				`outputs/${filename}`,
+				JSON.stringify(projects, null, 2),
+				"utf-8",
+			);
+			console.log(`Saved ${projects.length} projects to ${filename}`);
+		},
+	});
+
+	await crawlUsecase.execute();
 }
 
 main().catch(console.error);
