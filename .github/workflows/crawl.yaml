@@ -13,9 +13,50 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  crawl-and-update:
+  crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        include:
+          # Coconala URLs
+          - platform: coconala
+            url: https://coconala.com/requests/categories/231?ref=header&categoryId=231&page=1&recruiting=true
+          - platform: coconala
+            url: https://coconala.com/requests/categories/230?ref=header&categoryId=230&page=1&recruiting=true
+          - platform: coconala
+            url: https://coconala.com/requests/categories/232?ref=header&categoryId=232&page=1&recruiting=true
+          - platform: coconala
+            url: https://coconala.com/requests/categories/237?ref=header&categoryId=237&page=1&recruiting=true
+          - platform: coconala
+            url: https://coconala.com/requests/categories/813?ref=header&categoryId=813&page=1&recruiting=true
+          - platform: coconala
+            url: https://coconala.com/requests/categories/239?ref=header&categoryId=239&page=1&recruiting=true
+          - platform: coconala
+            url: https://coconala.com/requests/categories/236?ref=header&categoryId=236&page=1&recruiting=true
+          # CrowdWorks URLs
+          - platform: crowdworks
+            url: https://crowdworks.jp/public/jobs/search?category_id=2&order=new
+          - platform: crowdworks
+            url: https://crowdworks.jp/public/jobs/search?category_id=2&order=new&page=2
+          - platform: crowdworks
+            url: https://crowdworks.jp/public/jobs/search?category_id=83&order=new
+          - platform: crowdworks
+            url: https://crowdworks.jp/public/jobs/search?category_id=83&order=new&page=2
+          - platform: crowdworks
+            url: https://crowdworks.jp/public/jobs/search?category_id=282&order=new
+          - platform: crowdworks
+            url: https://crowdworks.jp/public/jobs/search?category_id=173&order=new
+          - platform: crowdworks
+            url: https://crowdworks.jp/public/jobs/search?category_id=78&order=new
+          - platform: crowdworks
+            url: https://crowdworks.jp/public/jobs/search?category_id=346&order=new
+          - platform: crowdworks
+            url: https://crowdworks.jp/public/jobs/search?category_id=347&order=new
+          - platform: crowdworks
+            url: https://crowdworks.jp/public/jobs/search?category_id=348&order=new
+          - platform: crowdworks
+            url: https://crowdworks.jp/public/jobs/search?category_id=269&order=new
 
     steps:
       - name: リポジトリチェックアウト
@@ -38,8 +79,54 @@ jobs:
       - name: Playwright インストール
         run: pnpm exec playwright install --with-deps
 
-      - name: クローリング
-        run: pnpm dlx tsx ./crawl.ts
+      - name: クローリング実行
+        run: pnpm dlx tsx ./crawl.ts ${{ matrix.platform }} "${{ matrix.url }}"
+
+      - name: クロール結果をアップロード
+        uses: actions/upload-artifact@v3
+        with:
+          name: crawl-results
+          path: outputs/*.json
+          retention-days: 1
+
+  update-notion:
+    needs: crawl
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: pnpm セットアップ
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: パッケージインストール
+        run: pnpm install
+
+      - name: クロール結果をダウンロード
+        uses: actions/download-artifact@v3
+        with:
+          name: crawl-results
+          path: outputs
+
+      - name: outputsフォルダのファイル一覧取得
+        id: get-files
+        run: |
+          FILES=$(find outputs -name "*.json" -type f | grep -v .gitignore | tr '\n' ' ')
+          echo "files=$FILES" >> $GITHUB_OUTPUT
 
       - name: データ更新
-        run: pnpm dlx tsx ./insert-to-notion.ts
+        run: |
+          for file in ${{ steps.get-files.outputs.files }}; do
+            echo "Processing: $file"
+            pnpm dlx tsx ./insert-to-notion.ts "$file"
+          done
