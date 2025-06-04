@@ -2,6 +2,7 @@ import type { Browser } from "playwright";
 import type { Budget, Project } from "../project";
 import { Platform, WageType } from "../project";
 import type { Crawler } from "./crawler";
+import { CoconalaDetailPOM } from "./coconala-detail-pom";
 
 function jpMoneyUnitToNumber(jpMoneyUnit: string): number {
 	const m = jpMoneyUnit.match(/(\d+)万(\d+)千円/);
@@ -133,52 +134,27 @@ export class CoconalaCrawler implements Crawler {
 		console.log(`[Coconala] 詳細ページ表示 ${url}`);
 		await page.goto(url);
 
-		const titleText = await page
-			.locator(".c-requestTitle_heading")
-			.textContent();
+		const detailPOM = new CoconalaDetailPOM(page);
+
+		const titleText = await detailPOM.getTitle();
 		console.log(`[Coconala] タイトル: ${titleText}`);
 
-		const categoryText = await page
-			.locator(".c-requestTitle_category")
-			.textContent();
+		const categoryText = await detailPOM.getCategory();
 		console.log(`[Coconala] カテゴリ: ${categoryText}`);
 
-		const requestRows = page.locator(".c-requestOutlineRow");
-
-		const budgetText = await requestRows
-			.filter({ hasText: "予算" })
-			.locator(".c-requestOutlineRow_content")
-			.textContent()
-			.then((text) => text?.trim());
+		const budgetText = await detailPOM.getBudget();
 		console.log(`[Coconala] 予算: ${budgetText}`);
 
-		const deliveryDateText = await requestRows
-			.filter({ hasText: "納品希望日" })
-			.locator(".c-requestOutlineRow_content")
-			.innerText();
+		const deliveryDateText = await detailPOM.getDeliveryDate();
 		console.log(`[Coconala] 納品期日: ${deliveryDateText}`);
 
-		const recruitingLimitText = await requestRows
-			.filter({ hasText: "募集期限" })
-			.locator(".c-requestOutlineRowContent_additional")
-			.textContent()
-			.then(
-				(text) => text?.match(/締切日\s*(\d{4}年\d{1,2}月\d{1,2}日)/)?.[1],
-			);
+		const recruitingLimitText = await detailPOM.getRecruitingLimit();
 		console.log(`[Coconala] 締切日: ${recruitingLimitText}`);
 
-		const publicationDateText = await requestRows
-			.filter({ hasText: "掲載日" })
-			.locator(".c-requestOutlineRowContent_additional")
-			.textContent()
-			.then(
-				(text) => text?.match(/掲載日\s*(\d{4}年\d{1,2}月\d{1,2}日)/)?.[1],
-			);
+		const publicationDateText = await detailPOM.getPublicationDate();
 		console.log(`[Coconala] 掲載日: ${publicationDateText}`);
 
-		const description = await page
-			.locator(".c-detailRowContentText")
-			.innerHTML();
+		const description = await detailPOM.getDescription();
 		console.log(`[Coconala] 説明: ${description}`);
 
 		const budget = toBudget(budgetText || "");
