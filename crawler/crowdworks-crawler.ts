@@ -8,6 +8,7 @@ import type {
 } from "../project";
 import { Platform, WageType } from "../project";
 import type { Crawler } from "./crawler";
+import { CrowdWorksDetailPOM } from "./crowdworks-detail-pom";
 
 function moneyToNumber(text: string): number {
 	return Number.parseInt(text.replace(/円|,/g, ""));
@@ -173,11 +174,12 @@ export class CrowdWorksCrawler implements Crawler {
 		console.log("[CrowdWorksCrawler] Navigating to detail page...");
 		await page.goto(url, { timeout: 60000 });
 
-		console.log(`[Crowdworks] visited`);
-		const title = (await page.title()).split("| 在宅")[0].trim();
+		const pom = new CrowdWorksDetailPOM(page);
+
+		const title = await pom.getTitle();
 		console.log(`[Crowdworks] title: ${title}`);
 
-		if (title.includes("非公開のお仕事")) {
+		if (await pom.isHiddenProject(title)) {
 			return {
 				platform: Platform.CrowdWorks,
 				projectId,
@@ -185,126 +187,39 @@ export class CrowdWorksCrawler implements Crawler {
 			};
 		}
 
-		const isRecruiting = await page
-			.getByText("このお仕事の募集は終了しています。")
-			.isHidden();
+		const isRecruiting = await pom.isRecruiting();
 		console.log(`[Crowdworks] isRecruiting: ${isRecruiting}`);
 
-		const wageType = (await page
-			.locator(".summary")
-			.getByText("報酬")
-			.isVisible())
+		const wageType = (await pom.isFixedWageType())
 			? WageType.Fixed
 			: WageType.Time;
 		console.log(`[Crowdworks] wageType: ${wageType}`);
-		const category = await page.locator(".subtitle>a").textContent();
-		if (!category) {
-			throw new Error("カテゴリが見つかりません");
-		}
-		console.log(`[Crowdworks] category: ${category}`);
-		const fixedBudgetText = (await page.getByText("固定報酬制").isVisible())
-			? (await page
-					.getByRole("row")
-					.filter({ has: page.getByText("固定報酬制") })
-					.getByRole("cell")
-					.nth(1)
-					.textContent()
-					.then((text) => text?.trim())) || ""
-			: "";
-		console.log(`[Crowdworks] fixedBudgetText: ${fixedBudgetText}`);
-		const hourlyBudgetText = (await page
-			.locator(".summary")
-			.getByText("時間単価")
-			.isVisible())
-			? (await page
-					.getByRole("row")
-					.filter({ has: page.getByText("時間単価制") })
-					.getByRole("cell")
-					.nth(1)
-					.textContent()
-					.then((text) => text?.trim())) || ""
-			: "";
-		console.log(`[Crowdworks] hourlyBudgetText: ${hourlyBudgetText}`);
-		const deliveryDateText = (await page
-			.locator(".summary")
-			.getByText("納品希望日")
-			.isVisible())
-			? (await page
-					.getByRole("row")
-					.filter({ has: page.getByText("納品希望日") })
-					.getByRole("cell")
-					.nth(1)
-					.textContent()
-					.then((text) => text?.trim())) || ""
-			: "";
-		console.log(`[Crowdworks] deliveryDateText: ${deliveryDateText}`);
-		const recruitingLimitText = (await page
-			.locator(".summary")
-			.getByText("応募期限")
-			.isVisible())
-			? (await page
-					.getByRole("row")
-					.filter({ has: page.getByText("応募期限") })
-					.getByRole("cell")
-					.nth(1)
-					.textContent()
-					.then((text) => text?.trim())) || ""
-			: "";
-		if (!recruitingLimitText) {
-			throw new Error("応募期限が見つかりません");
-		}
-		console.log(`[Crowdworks] recruitingLimitText: ${recruitingLimitText}`);
-		const publicationDateText = (await page
-			.locator(".summary")
-			.getByText("掲載日")
-			.isVisible())
-			? (await page
-					.getByRole("row")
-					.filter({ has: page.getByText("掲載日") })
-					.getByRole("cell")
-					.nth(1)
-					.textContent()
-					.then((text) => text?.trim())) || ""
-			: "";
-		if (!publicationDateText) {
-			throw new Error("掲載日が見つかりません");
-		}
-		console.log(`[Crowdworks] publicationDateText: ${publicationDateText}`);
-		const workingTimeText = (await page
-			.locator(".summary")
-			.getByText("稼働時間/週")
-			.isVisible())
-			? (await page
-					.getByRole("row")
-					.filter({ has: page.getByText("稼働時間/週") })
-					.getByRole("cell")
-					.nth(1)
-					.textContent()
-					.then((text) => text?.trim())) || ""
-			: "";
-		console.log(`[Crowdworks] workingTimeText: ${workingTimeText}`);
-		const periodText = (await page
-			.locator(".summary")
-			.getByText("期間")
-			.isVisible())
-			? (await page
-					.locator(".summary")
-					.getByRole("row")
-					.filter({ has: page.getByText("期間") })
-					.getByRole("cell")
-					.nth(1)
-					.textContent()
-					.then((text) => text?.trim())) || ""
-			: "";
 
+		const category = await pom.getCategory();
+		console.log(`[Crowdworks] category: ${category}`);
+
+		const fixedBudgetText = await pom.getFixedBudgetText();
+		console.log(`[Crowdworks] fixedBudgetText: ${fixedBudgetText}`);
+
+		const hourlyBudgetText = await pom.getHourlyBudgetText();
+		console.log(`[Crowdworks] hourlyBudgetText: ${hourlyBudgetText}`);
+
+		const deliveryDateText = await pom.getDeliveryDateText();
+		console.log(`[Crowdworks] deliveryDateText: ${deliveryDateText}`);
+
+		const recruitingLimitText = await pom.getRecruitingLimitText();
+		console.log(`[Crowdworks] recruitingLimitText: ${recruitingLimitText}`);
+
+		const publicationDateText = await pom.getPublicationDateText();
+		console.log(`[Crowdworks] publicationDateText: ${publicationDateText}`);
+
+		const workingTimeText = await pom.getWorkingTimeText();
+		console.log(`[Crowdworks] workingTimeText: ${workingTimeText}`);
+
+		const periodText = await pom.getPeriodText();
 		console.log(`[Crowdworks] periodText: ${periodText}`);
-		const description = await page
-			.locator(".confirm_outside_link")
-			.innerHTML()
-			.then((text) => text?.trim());
-		if (!description) {
-			throw new Error("説明が見つかりません");
-		}
+
+		const description = await pom.getDescription();
 
 		console.log("[CrowdWorksCrawler] Processing dates...");
 		const recruitingLimit = toDate(recruitingLimitText);
