@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__getDiagnostics",
+      "Bash(npx tsc:*)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:crowdworks.jp)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "notion-harusame-dev"
+  ]
+}

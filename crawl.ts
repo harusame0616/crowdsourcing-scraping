@@ -33,7 +33,6 @@ class CrawlingUsecase {
 async function createBrowserResource() {
 	console.log("Launching browser...");
 	const browser = await chromium.launch({
-		// headless: false,
 		timeout: 30000,
 	});
 	return {

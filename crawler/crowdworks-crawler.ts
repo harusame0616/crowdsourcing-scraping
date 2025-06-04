@@ -119,20 +119,20 @@ function toDate(jpDateStr: string) {
 
 export class CrowdWorksCrawler implements Crawler {
 	constructor(private browser: Browser) {}
-	
+
 	private async createPageResource() {
 		const page = await this.browser.newPage();
 		return {
 			page,
 			[Symbol.asyncDispose]: async () => {
 				await page.close();
-			}
+			},
 		};
 	}
-	
+
 	async listProjectUrls(url: string): Promise<string[]> {
 		console.log(`[CrowdWorksCrawler] プロジェクト一覧を取得します: ${url}`);
-		
+
 		await using pageResource = await this.createPageResource();
 		const { page } = pageResource;
 
@@ -166,121 +166,190 @@ export class CrowdWorksCrawler implements Crawler {
 			`\n[CrowdWorksCrawler] Fetching details for project: ${projectId}`,
 		);
 		console.log(`[CrowdWorksCrawler] URL: ${url}`);
-		
+
 		await using pageResource = await this.createPageResource();
 		const { page } = pageResource;
 
 		console.log("[CrowdWorksCrawler] Navigating to detail page...");
 		await page.goto(url, { timeout: 60000 });
 
-		console.log("[CrowdWorksCrawler] Extracting data from page...");
-		const data = await page.evaluate(() => {
-				const getText = (selector: string) => {
-					const el = document.querySelector(selector);
-					return el?.textContent?.trim() || "";
-				};
+		console.log(`[Crowdworks] visited`);
+		const title = (await page.title()).split("| 在宅")[0].trim();
+		console.log(`[Crowdworks] title: ${title}`);
 
-				const getHtml = (selector: string) => {
-					const el = document.querySelector(selector);
-					return el?.innerHTML?.trim() || "";
-				};
-
-				const getNextTdText = (thText: string) => {
-					const ths = Array.from(document.querySelectorAll("th"));
-					const th = ths.find((el) => el.textContent?.includes(thText));
-					if (th) {
-						const td = th.nextElementSibling;
-						return td?.textContent?.trim() || "";
-					}
-					return "";
-				};
-
-				const title = document.title.split("| 在宅")[0].trim();
-				const isHidden = title.includes("非公開のお仕事"); // Check if recruiting by looking for the end recruitment text
-				const spans = Array.from(document.querySelectorAll("span"));
-				const isRecruiting = !spans.some((span) =>
-					span.textContent?.includes("このお仕事の募集は終了しています。"),
-				);
-				const hasFixedWage = !!getNextTdText("固定報酬制");
-
-				const result = {
-					title,
-					isHidden,
-					category: getText(".subtitle>a"),
-					fixedBudgetText: getNextTdText("固定報酬制"),
-					hourlyBudgetText: getNextTdText("時間単価制"),
-					deliveryDateText: getNextTdText("納品希望日"),
-					recruitingLimitText: getNextTdText("応募期限"),
-					publicationDateText: getNextTdText("掲載日"),
-					workingTimeText: getNextTdText("稼働時間/週"),
-					periodText: getNextTdText("期間"),
-					description: getHtml(".confirm_outside_link"),
-					isRecruiting,
-					hasFixedWage,
-				};
-				return result;
-			});
-
-			console.log(
-				"[CrowdWorksCrawler] Raw data extracted:",
-				JSON.stringify(data, null, 2),
-			);
-
-			if (data.isHidden) {
-				return {
-					platform: Platform.CrowdWorks,
-					projectId,
-					hidden: true,
-				};
-			}
-
-			console.log("[CrowdWorksCrawler] Processing dates...");
-			const recruitingLimit = toDate(data.recruitingLimitText);
-			const publicationDate = toDate(data.publicationDateText);
-
-			const wageType = data.hasFixedWage ? WageType.Fixed : WageType.Time;
-			console.log(`[CrowdWorksCrawler] Wage type: ${wageType}`);
-
-			const projectVisible: ProjectVisible = {
+		if (title.includes("非公開のお仕事")) {
+			return {
 				platform: Platform.CrowdWorks,
 				projectId,
-				hidden: false,
-				title: data.title,
-				recruitingLimit,
-				category: data.category,
-				description: data.description,
-				publicationDate,
-				isRecruiting: data.isRecruiting,
+				hidden: true,
 			};
+		}
 
-			if (wageType === WageType.Fixed) {
-				console.log("[CrowdWorksCrawler] Processing fixed wage project...");
-				const budget = rawBudgetToBudget(data.fixedBudgetText);
-				const rawDeliveryDate = data.deliveryDateText;
-				const deliveryDate =
-					rawDeliveryDate === "-" || rawDeliveryDate === ""
-						? undefined
-						: toDate(rawDeliveryDate);
+		const isRecruiting = await page
+			.getByText("このお仕事の募集は終了しています。")
+			.isHidden();
+		console.log(`[Crowdworks] isRecruiting: ${isRecruiting}`);
 
-				return {
-					wageType: WageType.Fixed,
-					budget,
-					deliveryDate,
-					...projectVisible,
-				};
-			}
+		const wageType = (await page
+			.locator(".summary")
+			.getByText("報酬")
+			.isVisible())
+			? WageType.Fixed
+			: WageType.Time;
+		console.log(`[Crowdworks] wageType: ${wageType}`);
+		const category = await page.locator(".subtitle>a").textContent();
+		if (!category) {
+			throw new Error("カテゴリが見つかりません");
+		}
+		console.log(`[Crowdworks] category: ${category}`);
+		const fixedBudgetText = (await page.getByText("固定報酬制").isVisible())
+			? (await page
+					.getByRole("row")
+					.filter({ has: page.getByText("固定報酬制") })
+					.getByRole("cell")
+					.nth(1)
+					.textContent()
+					.then((text) => text?.trim())) || ""
+			: "";
+		console.log(`[Crowdworks] fixedBudgetText: ${fixedBudgetText}`);
+		const hourlyBudgetText = (await page
+			.locator(".summary")
+			.getByText("時間単価")
+			.isVisible())
+			? (await page
+					.getByRole("row")
+					.filter({ has: page.getByText("時間単価制") })
+					.getByRole("cell")
+					.nth(1)
+					.textContent()
+					.then((text) => text?.trim())) || ""
+			: "";
+		console.log(`[Crowdworks] hourlyBudgetText: ${hourlyBudgetText}`);
+		const deliveryDateText = (await page
+			.locator(".summary")
+			.getByText("納品希望日")
+			.isVisible())
+			? (await page
+					.getByRole("row")
+					.filter({ has: page.getByText("納品希望日") })
+					.getByRole("cell")
+					.nth(1)
+					.textContent()
+					.then((text) => text?.trim())) || ""
+			: "";
+		console.log(`[Crowdworks] deliveryDateText: ${deliveryDateText}`);
+		const recruitingLimitText = (await page
+			.locator(".summary")
+			.getByText("応募期限")
+			.isVisible())
+			? (await page
+					.getByRole("row")
+					.filter({ has: page.getByText("応募期限") })
+					.getByRole("cell")
+					.nth(1)
+					.textContent()
+					.then((text) => text?.trim())) || ""
+			: "";
+		if (!recruitingLimitText) {
+			throw new Error("応募期限が見つかりません");
+		}
+		console.log(`[Crowdworks] recruitingLimitText: ${recruitingLimitText}`);
+		const publicationDateText = (await page
+			.locator(".summary")
+			.getByText("掲載日")
+			.isVisible())
+			? (await page
+					.getByRole("row")
+					.filter({ has: page.getByText("掲載日") })
+					.getByRole("cell")
+					.nth(1)
+					.textContent()
+					.then((text) => text?.trim())) || ""
+			: "";
+		if (!publicationDateText) {
+			throw new Error("掲載日が見つかりません");
+		}
+		console.log(`[Crowdworks] publicationDateText: ${publicationDateText}`);
+		const workingTimeText = (await page
+			.locator(".summary")
+			.getByText("稼働時間/週")
+			.isVisible())
+			? (await page
+					.getByRole("row")
+					.filter({ has: page.getByText("稼働時間/週") })
+					.getByRole("cell")
+					.nth(1)
+					.textContent()
+					.then((text) => text?.trim())) || ""
+			: "";
+		console.log(`[Crowdworks] workingTimeText: ${workingTimeText}`);
+		const periodText = (await page
+			.locator(".summary")
+			.getByText("期間")
+			.isVisible())
+			? (await page
+					.locator(".summary")
+					.getByRole("row")
+					.filter({ has: page.getByText("期間") })
+					.getByRole("cell")
+					.nth(1)
+					.textContent()
+					.then((text) => text?.trim())) || ""
+			: "";
 
-			console.log("[CrowdWorksCrawler] Processing hourly wage project...");
-			const hourlyBudget = rawHourlyBudgetToBudget(data.hourlyBudgetText);
-			const workingTime = toWorkingTime(data.workingTimeText);
-			const period = toPeriod(data.periodText);
+		console.log(`[Crowdworks] periodText: ${periodText}`);
+		const description = await page
+			.locator(".confirm_outside_link")
+			.innerHTML()
+			.then((text) => text?.trim());
+		if (!description) {
+			throw new Error("説明が見つかりません");
+		}
+
+		console.log("[CrowdWorksCrawler] Processing dates...");
+		const recruitingLimit = toDate(recruitingLimitText);
+		const publicationDate = toDate(publicationDateText);
+
+		const projectVisible: ProjectVisible = {
+			platform: Platform.CrowdWorks,
+			projectId,
+			hidden: false,
+			title,
+			recruitingLimit,
+			category,
+			description,
+			publicationDate,
+			isRecruiting,
+		};
+
+		if (wageType === WageType.Fixed) {
+			console.log("[CrowdWorksCrawler] Processing fixed wage project...");
+			const budget = rawBudgetToBudget(fixedBudgetText);
+			const rawDeliveryDate = deliveryDateText;
+			const deliveryDate =
+				rawDeliveryDate === "-" || rawDeliveryDate === ""
+					? undefined
+					: toDate(rawDeliveryDate);
 
 			return {
-				wageType: WageType.Time,
-				hourlyBudget,
-				workingTime,
-				period,
+				wageType: WageType.Fixed,
+				budget,
+				deliveryDate,
 				...projectVisible,
 			};
+		}
+
+		console.log("[CrowdWorksCrawler] Processing hourly wage project...");
+		const hourlyBudget = rawHourlyBudgetToBudget(hourlyBudgetText);
+		const workingTime = toWorkingTime(workingTimeText);
+		const period = toPeriod(periodText);
+
+		return {
+			wageType: WageType.Time,
+			hourlyBudget,
+			workingTime,
+			period,
+			...projectVisible,
+		};
 	}
 }
