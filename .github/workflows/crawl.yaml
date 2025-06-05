@@ -112,7 +112,7 @@ jobs:
   update-notion:
     needs: [crawl-coconala, crawl-crowdworks]
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 60
 
     steps:
       - name: リポジトリチェックアウト
