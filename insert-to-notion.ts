@@ -48,31 +48,45 @@ class NotionProjectManager {
 	 * - 連続する<br>は新しいブロックとして分割
 	 * - 2000文字を超える場合は新しいブロックに分割
 	 */
-	private formatDescriptionBlocks(description: string): Array<{ object: 'block', type: 'paragraph', paragraph: { rich_text: Array<{ type: 'text', text: { content: string } }> } }> {
-		const blocks: Array<{ object: 'block', type: 'paragraph', paragraph: { rich_text: Array<{ type: 'text', text: { content: string } }> } }> = [];
-		
+	private formatDescriptionBlocks(description: string): Array<{
+		object: "block";
+		type: "paragraph";
+		paragraph: {
+			rich_text: Array<{ type: "text"; text: { content: string } }>;
+		};
+	}> {
+		const blocks: Array<{
+			object: "block";
+			type: "paragraph";
+			paragraph: {
+				rich_text: Array<{ type: "text"; text: { content: string } }>;
+			};
+		}> = [];
+
 		// 連続する<br>で分割（2つ以上の<br>を区切りとする）
 		const paragraphs = description.split(/(?:<br\s*\/?>\s*){2,}/g);
-		
+
 		for (const paragraph of paragraphs) {
 			if (!paragraph.trim()) continue;
-			
+
 			// 単一の<br>を改行に変換
-			let formattedText = paragraph.replace(/<br\s*\/?>/g, '\n').trim();
-			
+			const formattedText = paragraph.replace(/<br\s*\/?>/g, "\n").trim();
+
 			// 2000文字を超える場合は分割
 			if (formattedText.length <= 2000) {
 				blocks.push({
-					object: 'block' as const,
-					type: 'paragraph' as const,
+					object: "block" as const,
+					type: "paragraph" as const,
 					paragraph: {
-						rich_text: [{
-							type: 'text' as const,
-							text: {
-								content: formattedText
-							}
-						}]
-					}
+						rich_text: [
+							{
+								type: "text" as const,
+								text: {
+									content: formattedText,
+								},
+							},
+						],
+					},
 				});
 			} else {
 				// 2000文字ごとに分割
@@ -80,22 +94,24 @@ class NotionProjectManager {
 				while (currentIndex < formattedText.length) {
 					const chunk = formattedText.slice(currentIndex, currentIndex + 2000);
 					blocks.push({
-						object: 'block' as const,
-						type: 'paragraph' as const,
+						object: "block" as const,
+						type: "paragraph" as const,
 						paragraph: {
-							rich_text: [{
-								type: 'text' as const,
-								text: {
-									content: chunk
-								}
-							}]
-						}
+							rich_text: [
+								{
+									type: "text" as const,
+									text: {
+										content: chunk,
+									},
+								},
+							],
+						},
 					});
 					currentIndex += 2000;
 				}
 			}
 		}
-		
+
 		return blocks;
 	}
 
@@ -104,7 +120,10 @@ class NotionProjectManager {
 	 * @param projectId - プロジェクトID
 	 * @param platform - プラットフォーム名
 	 */
-	async findExistingPage(projectId: string, platform: string): Promise<any | null> {
+	async findExistingPage(
+		projectId: string,
+		platform: string,
+	): Promise<any | null> {
 		try {
 			const response = await this.notion.databases.query({
 				database_id: this.databaseId,
@@ -144,7 +163,10 @@ class NotionProjectManager {
 			}
 
 			const properties = this.buildNotionProperties(projectData);
-			const existingPage = await this.findExistingPage(projectData.projectId, projectData.platform);
+			const existingPage = await this.findExistingPage(
+				projectData.projectId,
+				projectData.platform,
+			);
 
 			if (existingPage) {
 				// 既存のページを更新
@@ -152,7 +174,7 @@ class NotionProjectManager {
 					page_id: existingPage.id,
 					properties: properties,
 				});
-				
+
 				// 詳細説明を本文として追加/更新
 				// まず既存のブロックを取得
 				if (projectData.description) {
@@ -160,26 +182,30 @@ class NotionProjectManager {
 						const blocks = await this.notion.blocks.children.list({
 							block_id: existingPage.id,
 						});
-						
+
 						// 既存のブロックをすべて削除
 						for (const block of blocks.results) {
-							if ('id' in block) {
+							if ("id" in block) {
 								await this.notion.blocks.delete({ block_id: block.id });
 							}
 						}
-						
+
 						// 新しいブロックを追加
-						const descriptionBlocks = this.formatDescriptionBlocks(projectData.description);
+						const descriptionBlocks = this.formatDescriptionBlocks(
+							projectData.description,
+						);
 						await this.notion.blocks.children.append({
 							block_id: existingPage.id,
-							children: descriptionBlocks
+							children: descriptionBlocks,
 						});
 					} catch (error) {
 						console.warn("本文の更新に失敗しました:", (error as Error).message);
 					}
 				}
-				
-				console.log(`✅ プロジェクトが更新されました: ${projectData.title || projectData.projectId}`);
+
+				console.log(
+					`✅ プロジェクトが更新されました: ${projectData.title || projectData.projectId}`,
+				);
 				return response;
 			} else {
 				// 新規ページを作成
@@ -187,14 +213,18 @@ class NotionProjectManager {
 					parent: { database_id: this.databaseId },
 					properties: properties,
 				};
-				
+
 				// 詳細説明を本文として追加
 				if (projectData.description) {
-					createData.children = this.formatDescriptionBlocks(projectData.description);
+					createData.children = this.formatDescriptionBlocks(
+						projectData.description,
+					);
 				}
-				
+
 				const response = await this.notion.pages.create(createData);
-				console.log(`✅ プロジェクトが追加されました: ${projectData.title || projectData.projectId}`);
+				console.log(
+					`✅ プロジェクトが追加されました: ${projectData.title || projectData.projectId}`,
+				);
 				return response;
 			}
 		} catch (error) {
@@ -349,15 +379,27 @@ class NotionProjectManager {
 
 		for (const project of projectsArray) {
 			try {
+				await new Promise((resolve) => setTimeout(resolve, 100));
 				if (!project.projectId || !project.platform) {
-					console.warn("プロジェクトIDまたはプラットフォームが不足:", project.title || "タイトルなし");
+					console.warn(
+						"プロジェクトIDまたはプラットフォームが不足:",
+						project.title || "タイトルなし",
+					);
 					continue;
 				}
-				
-				const existingPage = await this.findExistingPage(project.projectId, project.platform);
+
+				const existingPage = await this.findExistingPage(
+					project.projectId,
+					project.platform,
+				);
+				if (existingPage) {
+					console.log("登録済みのためスキップ");
+					continue;
+				}
+
 				const result = await this.upsertProject(project);
 				results.push({ success: true, data: result });
-				
+
 				if (existingPage) {
 					updated++;
 				} else {
@@ -365,7 +407,6 @@ class NotionProjectManager {
 				}
 
 				// API制限を考慮して少し待機
-				await new Promise((resolve) => setTimeout(resolve, 100));
 			} catch (error) {
 				results.push({
 					success: false,
@@ -403,7 +444,7 @@ async function main() {
 	}
 
 	const filePath = resolve(args[0]);
-	
+
 	// 環境変数またはここに直接設定
 	const NOTION_TOKEN =
 		process.env.NOTION_TOKEN || "your_notion_integration_token";
@@ -415,15 +456,15 @@ async function main() {
 	try {
 		// JSONファイルを読み込む
 		console.log(`📄 ファイルを読み込んでいます: ${filePath}`);
-		const fileContent = readFileSync(filePath, 'utf-8');
+		const fileContent = readFileSync(filePath, "utf-8");
 		const projects = JSON.parse(fileContent) as ProjectData[];
-		
+
 		if (!Array.isArray(projects)) {
 			throw new Error("ファイルの内容が配列ではありません");
 		}
-		
+
 		console.log(`🔄 ${projects.length}件のプロジェクトをインポートします...`);
-		
+
 		// プロジェクトのインポート
 		if (projects.length > 0) {
 			await projectManager.upsertMultipleProjects(projects);
@@ -432,10 +473,12 @@ async function main() {
 		console.log("\n✅ インポートが完了しました");
 	} catch (error) {
 		if (error instanceof Error) {
-			if ('code' in error && error.code === 'ENOENT') {
+			if ("code" in error && error.code === "ENOENT") {
 				console.error(`\n❌ エラー: ファイルが見つかりません: ${filePath}`);
 			} else if (error instanceof SyntaxError) {
-				console.error(`\n❌ エラー: JSONファイルの形式が正しくありません: ${error.message}`);
+				console.error(
+					`\n❌ エラー: JSONファイルの形式が正しくありません: ${error.message}`,
+				);
 			} else {
 				console.error(`\n❌ エラーが発生しました: ${error.message}`);
 			}
