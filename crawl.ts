@@ -52,9 +52,13 @@ async function main() {
 		process.exit(1);
 	}
 
-
 	const platform = v.parse(v.enum(Platform), args[0]);
-	const listUrls = args.slice(1).map(url => v.parse(v.pipe(v.string(), v.url()), url));
+	const listUrls = args
+		.slice(1)
+		.map((url) => v.parse(v.pipe(v.string(), v.url()), url));
+
+	console.log("platform:", platform);
+	console.log("listUrls:", listUrls);
 
 	await using browserResource = await createBrowserResource();
 	const { browser } = browserResource;
@@ -63,9 +67,10 @@ async function main() {
 
 	const crawlUsecase = new CrawlingUsecase(crawler, listUrls, {
 		saveMany: async (projects: Project[]) => {
-			const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+			const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 			const filename = `${platform}_batch_${timestamp}.json`;
 
+			await fs.mkdir("outputs", { recursive: true });
 			await fs.writeFile(
 				`outputs/${filename}`,
 				JSON.stringify(projects, null, 2),
