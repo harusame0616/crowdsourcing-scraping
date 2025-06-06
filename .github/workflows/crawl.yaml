@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
-      max-parallel: 1
+      max-parallel: 3
       matrix:
         urls:
           - '"https://coconala.com/requests/categories/231?ref=header&categoryId=231&page=1&recruiting=true" "https://coconala.com/requests/categories/230?ref=header&categoryId=230&page=1&recruiting=true" "https://coconala.com/requests/categories/232?ref=header&categoryId=232&page=1&recruiting=true"'
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
-      max-parallel: 1
+      max-parallel: 3
       matrix:
         urls:
           - '"https://crowdworks.jp/public/jobs/search?category_id=2&order=new" "https://crowdworks.jp/public/jobs/search?category_id=83&order=new" "https://crowdworks.jp/public/jobs/search?category_id=282&order=new"'
