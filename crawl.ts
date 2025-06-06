@@ -18,13 +18,13 @@ class CrawlingUsecase {
 		const projectUrls: string[] = [];
 		for (const listPage of this.listUrls) {
 			projectUrls.push(...(await this.crawler.listProjectUrls(listPage)));
-			await setTimeout(500);
+			await setTimeout(100);
 		}
 
 		const projects: Project[] = [];
 		for (const projectUrl of projectUrls) {
 			projects.push(await this.crawler.detail(projectUrl));
-			await setTimeout(500);
+			await setTimeout(100);
 		}
 
 		await this.repo.saveMany(projects);
