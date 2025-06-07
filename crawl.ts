@@ -1,11 +1,11 @@
 import { chromium } from "playwright";
-import { setTimeout } from "node:timers/promises";
 import type { Project } from "./project";
 import type { Crawler } from "./crawler/crawler";
 import { getCrawler } from "./crawler/get-crawler";
 import { Platform } from "./project/platform";
 import fs from "node:fs/promises";
 import * as v from "valibot";
+import pMap from "p-map";
 
 class CrawlingUsecase {
 	constructor(
@@ -15,17 +15,19 @@ class CrawlingUsecase {
 	) {}
 
 	async execute() {
-		const projectUrls: string[] = [];
-		for (const listPage of this.listUrls) {
-			projectUrls.push(...(await this.crawler.listProjectUrls(listPage)));
-			await setTimeout(100);
-		}
+		const projectUrls = (
+			await pMap(
+				this.listUrls,
+				async (listPage) => this.crawler.listProjectUrls(listPage),
+				{ concurrency: 10 },
+			)
+		).flat();
 
-		const projects: Project[] = [];
-		for (const projectUrl of projectUrls) {
-			projects.push(await this.crawler.detail(projectUrl));
-			await setTimeout(100);
-		}
+		const projects = await pMap(
+			projectUrls,
+			async (projectUrl) => this.crawler.detail(projectUrl),
+			{ concurrency: 10 },
+		);
 
 		await this.repo.saveMany(projects);
 	}
