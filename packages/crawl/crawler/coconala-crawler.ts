@@ -1,6 +1,6 @@
 import type { Browser } from "playwright";
-import type { Budget, Project } from "../project";
-import { Platform, WageType } from "../project";
+import type { Budget, Project } from "../../share/project";
+import { Platform, WageType } from "../../share/project";
 import type { Crawler } from "./crawler";
 import { CoconalaDetailPOM } from "./coconala-detail-pom";
 
@@ -76,7 +76,7 @@ export class CoconalaCrawler implements Crawler {
 			page,
 			[Symbol.asyncDispose]: async () => {
 				await page.close();
-			}
+			},
 		};
 	}
 
@@ -88,9 +88,7 @@ export class CoconalaCrawler implements Crawler {
 		await page.goto(url);
 
 		const titlesLocator = page.locator(".c-itemInfo_title");
-		const noHitLocator = page.getByText(
-			"該当する仕事が見つかりませんでした。",
-		);
+		const noHitLocator = page.getByText("該当する仕事が見つかりませんでした。");
 
 		console.log("[Coconala] 一覧もしくはヒットなしメッセージ待ち");
 		await Promise.race([
@@ -107,9 +105,7 @@ export class CoconalaCrawler implements Crawler {
 		const titleLocators = await titlesLocator.all();
 		return await Promise.all(
 			titleLocators.map(async (titleLocator) => {
-				const href = await titleLocator
-					.getByRole("link")
-					.getAttribute("href");
+				const href = await titleLocator.getByRole("link").getAttribute("href");
 
 				if (href === null) {
 					throw new Error("href is null");

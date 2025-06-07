@@ -1,4 +1,4 @@
-import type { Project } from "../project";
+import type { Project } from "../../share/project";
 
 export interface Crawler {
 	listProjectUrls: (url: string) => Promise<string[]>;

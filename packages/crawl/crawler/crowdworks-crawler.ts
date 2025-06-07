@@ -5,8 +5,8 @@ import type {
 	Project,
 	ProjectVisible,
 	WorkingTime,
-} from "../project";
-import { Platform, WageType } from "../project";
+} from "../../share/project";
+import { Platform, WageType } from "../../share/project";
 import type { Crawler } from "./crawler";
 import { CrowdWorksDetailPOM } from "./crowdworks-detail-pom";
 

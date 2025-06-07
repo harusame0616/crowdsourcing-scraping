@@ -1,5 +1,5 @@
 import type { Browser } from "playwright";
-import { Platform } from "../project/platform";
+import { Platform } from "../../share/project/platform";
 import type { Crawler } from "./crawler";
 import { CoconalaCrawler } from "./coconala-crawler";
 import { CrowdWorksCrawler } from "./crowdworks-crawler";
