@@ -15,6 +15,8 @@ class CrawlingUsecase {
 	) {}
 
 	async execute() {
+		console.log("[Crawling Usecase].execute 開始");
+
 		const projectUrls = (
 			await pMap(
 				this.listUrls,
@@ -23,10 +25,19 @@ class CrawlingUsecase {
 			)
 		).flat();
 
+		console.log("[Crawling Usecase].execute プロジェクトURL取得完了", {
+			projectUrls,
+		});
+
 		const projects = await pMap(
 			projectUrls,
 			async (projectUrl) => this.crawler.detail(projectUrl),
 			{ concurrency: 10 },
+		);
+
+		console.log(
+			"[Crawling Usecase].execute プロジェクト詳細取得完了",
+			projects.map((project) => project.projectId),
 		);
 
 		await this.repo.saveMany(projects);
@@ -34,7 +45,7 @@ class CrawlingUsecase {
 }
 
 async function createBrowserResource() {
-	console.log("Launching browser...");
+	console.log("[createBrowserResource] ブラウザ起動");
 	const browser = await chromium.launch({
 		timeout: 30000,
 	});
@@ -59,8 +70,7 @@ async function main() {
 		.slice(1)
 		.map((url) => v.parse(v.pipe(v.string(), v.url()), url));
 
-	console.log("platform:", platform);
-	console.log("listUrls:", listUrls);
+	console.log("[main] 引数パース完了", { platform, listUrls });
 
 	await using browserResource = await createBrowserResource();
 	const { browser } = browserResource;

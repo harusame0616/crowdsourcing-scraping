@@ -84,26 +84,26 @@ export class CoconalaCrawler implements Crawler {
 		await using pageResource = await this.createPageResource();
 		const { page } = pageResource;
 
-		console.log(`[Coconala] 一覧ページ表示 ${url}`);
+		console.log("[Coconala Crawler].listProjectUrls 開始", { url });
 		await page.goto(url);
 
+		console.log("[Coconala Crawler].listProjectUrls 一覧データ取得");
 		const titlesLocator = page.locator(".c-itemInfo_title");
 		const noHitLocator = page.getByText("該当する仕事が見つかりませんでした。");
 
-		console.log("[Coconala] 一覧もしくはヒットなしメッセージ待ち");
 		await Promise.race([
 			titlesLocator.first().waitFor({ state: "visible" }).catch(),
 			noHitLocator.waitFor({ state: "visible" }).catch(),
 		]);
 
 		if (await noHitLocator.isVisible()) {
-			console.log("[Coconala] ヒットなし");
+			console.log("[Coconala Crawler].listProjectUrls ヒットなし");
 			return [];
 		}
 
-		console.log("[Coconala] プロジェクト ID 取得開始");
+		console.log("[Coconala Crawler].listProjectUrls プロジェクト ID 取得開始");
 		const titleLocators = await titlesLocator.all();
-		return await Promise.all(
+		const projectIds = await Promise.all(
 			titleLocators.map(async (titleLocator) => {
 				const href = await titleLocator.getByRole("link").getAttribute("href");
 
@@ -111,14 +111,15 @@ export class CoconalaCrawler implements Crawler {
 					throw new Error("href is null");
 				}
 
-				const projectId = href.replace("https://coconala.com/requests/", "");
-				console.log(
-					`[Coconala] プロジェクト ID 取得完了: ${href} -> ${projectId}`,
-				);
-
-				return projectId;
+				return href.replace("https://coconala.com/requests/", "");
 			}),
 		);
+
+		console.log("[Coconala Crawler].listProjectUrls プロジェクト ID 取得完了", {
+			projectIds,
+		});
+
+		return projectIds;
 	}
 
 	async detail(projectId: string): Promise<Project> {
@@ -127,34 +128,34 @@ export class CoconalaCrawler implements Crawler {
 		await using pageResource = await this.createPageResource();
 		const { page } = pageResource;
 
-		console.log(`[Coconala] 詳細ページ表示 ${url}`);
+		console.log(`[Coconala Crawler] 詳細ページ表示 ${url}`);
 		await page.goto(url);
 
 		const detailPOM = new CoconalaDetailPOM(page);
 
 		const titleText = await detailPOM.getTitle();
-		console.log(`[Coconala] タイトル: ${titleText}`);
+		console.log(`[Coconala Crawler] タイトル: ${titleText}`);
 
 		const categoryText = await detailPOM.getCategory();
-		console.log(`[Coconala] カテゴリ: ${categoryText}`);
+		console.log(`[Coconala Crawler] カテゴリ: ${categoryText}`);
 
 		const budgetText = await detailPOM.getBudget();
-		console.log(`[Coconala] 予算: ${budgetText}`);
+		console.log(`[Coconala Crawler] 予算: ${budgetText}`);
 
 		const deliveryDateText = await detailPOM.getDeliveryDate();
-		console.log(`[Coconala] 納品期日: ${deliveryDateText}`);
+		console.log(`[Coconala Crawler] 納品期日: ${deliveryDateText}`);
 
 		const recruitingLimitText = await detailPOM.getRecruitingLimit();
-		console.log(`[Coconala] 締切日: ${recruitingLimitText}`);
+		console.log(`[Coconala Crawler] 締切日: ${recruitingLimitText}`);
 
 		const publicationDateText = await detailPOM.getPublicationDate();
-		console.log(`[Coconala] 掲載日: ${publicationDateText}`);
+		console.log(`[Coconala Crawler] 掲載日: ${publicationDateText}`);
 
 		const description = await detailPOM.getDescription();
-		console.log(`[Coconala] 説明: ${description}`);
+		console.log(`[Coconala Crawler] 説明: ${description}`);
 
 		const budget = toBudget(budgetText || "");
-		console.log(`[Coconala] Budget: ${JSON.stringify(budget)}`);
+		console.log(`[Coconala Crawler] Budget: ${JSON.stringify(budget)}`);
 
 		const deliveryDate =
 			deliveryDateText === "ご相談"
@@ -165,7 +166,9 @@ export class CoconalaCrawler implements Crawler {
 
 		const publicationDate = jpDateStringToDate(publicationDateText || "");
 		if (publicationDate === null) {
-			throw new Error(`[Coconala] 掲載日が不正です: ${publicationDateText}`);
+			throw new Error(
+				`[Coconala Crawler] 掲載日が不正です: ${publicationDateText}`,
+			);
 		}
 
 		return {
