@@ -1,8 +1,8 @@
 import { chromium } from "playwright";
-import type { Project } from "./share/project";
+import type { Project } from "./src/share/project";
 import type { Crawler } from "./crawler/crawler";
 import { getCrawler } from "./crawler/get-crawler";
-import { Platform } from "./share/project/platform";
+import { Platform } from "./src/share/project/platform";
 import fs from "node:fs/promises";
 import * as v from "valibot";
 import pMap from "p-map";
@@ -72,6 +72,7 @@ async function main() {
 			const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 			const filename = `${platform}_batch_${timestamp}.json`;
 
+			await fs.mkdir("outputs", { recursive: true });
 			await fs.writeFile(
 				`outputs/${filename}`,
 				JSON.stringify(projects, null, 2),
