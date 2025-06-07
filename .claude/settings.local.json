@@ -4,7 +4,8 @@
       "mcp__ide__getDiagnostics",
       "Bash(npx tsc:*)",
       "Bash(mkdir:*)",
-      "WebFetch(domain:crowdworks.jp)"
+      "WebFetch(domain:crowdworks.jp)",
+      "Bash(mv:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
