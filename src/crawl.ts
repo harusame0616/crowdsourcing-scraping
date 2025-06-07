@@ -6,7 +6,6 @@ import { Platform } from "../project/platform";
 import fs from "node:fs/promises";
 import * as v from "valibot";
 import pMap from "p-map";
-import path from "node:path";
 
 class CrawlingUsecase {
 	constructor(
@@ -72,12 +71,9 @@ async function main() {
 		saveMany: async (projects: Project[]) => {
 			const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 			const filename = `${platform}_batch_${timestamp}.json`;
-			const outputDir = path.join(process.cwd(), "outputs");
-			const outputPath = path.join(outputDir, filename);
 
-			await fs.mkdir(outputDir, { recursive: true });
 			await fs.writeFile(
-				outputPath,
+				`outputs/${filename}`,
 				JSON.stringify(projects, null, 2),
 				"utf-8",
 			);
