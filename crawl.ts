@@ -1,8 +1,8 @@
 import { chromium } from "playwright";
-import type { Project } from "./src/share/project";
+import type { Project } from "./packages/share/project";
 import type { Crawler } from "./crawler/crawler";
 import { getCrawler } from "./crawler/get-crawler";
-import { Platform } from "./src/share/project/platform";
+import { Platform } from "./packages/share/project/platform";
 import fs from "node:fs/promises";
 import * as v from "valibot";
 import pMap from "p-map";

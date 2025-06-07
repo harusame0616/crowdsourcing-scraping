@@ -5,8 +5,8 @@ import type {
 	Project,
 	ProjectVisible,
 	WorkingTime,
-} from "../src/share/project";
-import { Platform, WageType } from "../src/share/project";
+} from "../packages/share/project";
+import { Platform, WageType } from "../packages/share/project";
 import type { Crawler } from "./crawler";
 import { LancersDetailPom } from "./lancers-detail-pom";
 import { LancersListPom } from "./lancers-list-pom";
