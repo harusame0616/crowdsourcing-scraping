@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { NotionProjectManager, type ProjectData } from "./notion-project-manager";
+import { NotionProjectManager, type ProjectData } from "share/notion";
 
 // JSONファイルからプロジェクトをインポートしてDBを更新
 async function main() {

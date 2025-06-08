@@ -9,7 +9,8 @@
       "Bash(find:*)",
       "Bash(pnpm list:*)",
       "Bash(pnpm add:*)",
-      "Bash(npx biome check:*)"
+      "Bash(npx biome check:*)",
+      "Bash(pnpm install:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
