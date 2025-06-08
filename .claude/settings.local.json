@@ -7,7 +7,9 @@
       "WebFetch(domain:crowdworks.jp)",
       "Bash(mv:*)",
       "Bash(find:*)",
-      "Bash(pnpm list:*)"
+      "Bash(pnpm list:*)",
+      "Bash(pnpm add:*)",
+      "Bash(npx biome check:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

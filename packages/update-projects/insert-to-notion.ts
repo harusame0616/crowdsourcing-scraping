@@ -27,12 +27,6 @@ interface NotionProperty {
 	[key: string]: any;
 }
 
-interface AddProjectResult {
-	success: boolean;
-	data?: any;
-	error?: string;
-}
-
 class NotionProjectManager {
 	private notion: Client;
 	private databaseId: string;
@@ -44,9 +38,6 @@ class NotionProjectManager {
 
 	/**
 	 * descriptionを適切なブロックに分割
-	 * - 単一の<br>は改行(\n)に変換
-	 * - 連続する<br>は新しいブロックとして分割
-	 * - 2000文字を超える場合は新しいブロックに分割
 	 */
 	private formatDescriptionBlocks(description: string): Array<{
 		object: "block";
@@ -116,138 +107,201 @@ class NotionProjectManager {
 	}
 
 	/**
-	 * プロジェクトIDとプラットフォームで既存のページを検索
-	 * @param projectId - プロジェクトID
-	 * @param platform - プラットフォーム名
+	 * 複数のプロジェクトIDに対して既存のプロジェクトを一括検索
 	 */
-	async findExistingPage(
-		projectId: string,
-		platform: string,
-	): Promise<any | null> {
-		try {
-			const response = await this.notion.databases.query({
-				database_id: this.databaseId,
-				filter: {
-					and: [
-						{
-							property: "プロジェクトID",
-							number: {
-								equals: Number.parseInt(projectId),
-							},
-						},
-						{
-							property: "プラットフォーム",
-							select: {
-								equals: platform,
-							},
-						},
-					],
-				},
-			});
-
-			return response.results.length > 0 ? response.results[0] : null;
-		} catch (error) {
-			console.error("検索エラー:", (error as Error).message);
-			return null;
+	async findByProjectIds(
+		projectIds: Array<{ projectId: number; platform: string }>,
+	): Promise<ProjectData[]> {
+		if (projectIds.length === 0) {
+			return [];
 		}
-	}
 
-	/**
-	 * プロジェクトデータをNotionデータベースにupsert（存在すれば更新、なければ作成）
-	 * @param projectData - プロジェクトデータ
-	 */
-	async upsertProject(projectData: ProjectData): Promise<any> {
 		try {
-			if (!projectData.projectId || !projectData.platform) {
-				throw new Error("プロジェクトIDとプラットフォームは必須です");
-			}
+			// OR条件を構築して一括でクエリを実行
+			const orConditions = projectIds.map(({ projectId, platform }) => ({
+				and: [
+					{
+						property: "プロジェクトID",
+						number: {
+							equals: projectId,
+						},
+					},
+					{
+						property: "プラットフォーム",
+						select: {
+							equals: platform,
+						},
+					},
+				],
+			}));
 
-			const properties = this.buildNotionProperties(projectData);
-			const existingPage = await this.findExistingPage(
-				projectData.projectId,
-				projectData.platform,
-			);
+			// Notion APIでページング処理
+			let hasMore = true;
+			let startCursor: string | undefined = undefined;
+			const existingProjects: ProjectData[] = [];
 
-			if (existingPage) {
-				// 既存のページを更新
-				const response = await this.notion.pages.update({
-					page_id: existingPage.id,
-					properties: properties,
+			while (hasMore) {
+				const response = await this.notion.databases.query({
+					database_id: this.databaseId,
+					filter: {
+						or: orConditions,
+					},
+					start_cursor: startCursor,
+					page_size: 100,
 				});
 
-				// 詳細説明を本文として追加/更新
-				// まず既存のブロックを取得
-				if (projectData.description) {
-					try {
-						const blocks = await this.notion.blocks.children.list({
-							block_id: existingPage.id,
-						});
+				// Notionのページから ProjectData に変換
+				for (const page of response.results) {
+					if (
+						"properties" in page &&
+						page.properties?.["プロジェクトID"]?.number &&
+						page.properties?.["プラットフォーム"]?.select?.name
+					) {
+						const project: ProjectData = {
+							projectId: page.properties["プロジェクトID"].number,
+							platform: page.properties["プラットフォーム"].select.name,
+						};
 
-						// 既存のブロックをすべて削除
-						for (const block of blocks.results) {
-							if ("id" in block) {
-								await this.notion.blocks.delete({ block_id: block.id });
-							}
+						// その他のプロパティも取得
+						if (page.properties["名前"]?.title?.[0]?.text?.content) {
+							project.title = page.properties["名前"].title[0].text.content;
+						}
+						if (page.properties["非表示"]?.checkbox !== undefined) {
+							project.hidden = page.properties["非表示"].checkbox;
+						}
+						if (page.properties["報酬タイプ"]?.select?.name) {
+							project.wageType = page.properties["報酬タイプ"].select.name;
+						}
+						if (page.properties["URL"]?.url) {
+							project.url = page.properties["URL"].url;
+						}
+						if (page.properties["カテゴリ"]?.select?.name) {
+							project.category = page.properties["カテゴリ"].select.name;
+						}
+						if (
+							page.properties["予算最小"]?.number ||
+							page.properties["予算最大"]?.number
+						) {
+							project.budget = {
+								min: page.properties["予算最小"]?.number,
+								max: page.properties["予算最大"]?.number,
+							};
+						}
+						if (page.properties["納期"]?.date?.start) {
+							project.deliveryDate = page.properties["納期"].date.start;
+						}
+						if (page.properties["募集期限"]?.date?.start) {
+							project.recruitingLimit = page.properties["募集期限"].date.start;
+						}
+						if (page.properties["公開日"]?.date?.start) {
+							project.publicationDate = page.properties["公開日"].date.start;
+						}
+						if (page.properties["募集中"]?.checkbox !== undefined) {
+							project.isRecruiting = page.properties["募集中"].checkbox;
 						}
 
-						// 新しいブロックを追加
-						const descriptionBlocks = this.formatDescriptionBlocks(
-							projectData.description,
-						);
-						await this.notion.blocks.children.append({
-							block_id: existingPage.id,
-							children: descriptionBlocks,
-						});
-					} catch (error) {
-						console.warn("本文の更新に失敗しました:", (error as Error).message);
+						existingProjects.push(project);
 					}
 				}
 
-				console.log(
-					`✅ プロジェクトが更新されました: ${projectData.title || projectData.projectId}`,
-				);
-				return response;
-			} else {
-				// 新規ページを作成
-				const createData: any = {
-					parent: { database_id: this.databaseId },
-					properties: properties,
-				};
+				hasMore = response.has_more;
+				startCursor = response.next_cursor || undefined;
 
-				// 詳細説明を本文として追加
-				if (projectData.description) {
-					createData.children = this.formatDescriptionBlocks(
-						projectData.description,
-					);
+				// API制限を考慮して少し待機
+				if (hasMore) {
+					await new Promise((resolve) => setTimeout(resolve, 100));
 				}
-
-				const response = await this.notion.pages.create(createData);
-				console.log(
-					`✅ プロジェクトが追加されました: ${projectData.title || projectData.projectId}`,
-				);
-				return response;
 			}
+
+			return existingProjects;
 		} catch (error) {
 			console.error(
-				"❌ プロジェクトのupsertに失敗しました:",
+				"一括検索でエラーが発生しました:",
 				(error as Error).message,
 			);
-			throw error;
+			return [];
 		}
 	}
 
 	/**
-	 * プロジェクトデータをNotionデータベースに書き込む（後方互換性のため残す）
-	 * @param projectData - プロジェクトデータ
+	 * 複数のプロジェクトを一括で追加
 	 */
-	async addProject(projectData: ProjectData): Promise<any> {
-		return this.upsertProject(projectData);
+	async addProjects(
+		projects: ProjectData[],
+	): Promise<{ success: number; failed: number; errors: Array<{ project: ProjectData; error: string }> }> {
+		let successCount = 0;
+		let failedCount = 0;
+		const errors: Array<{ project: ProjectData; error: string }> = [];
+
+		console.log(`📝 ${projects.length}件のプロジェクトを追加します...`);
+
+		// Notion APIは一括作成をサポートしていないため、並列処理で高速化
+		const BATCH_SIZE = 10; // 同時実行数
+		for (let i = 0; i < projects.length; i += BATCH_SIZE) {
+			const batch = projects.slice(i, i + BATCH_SIZE);
+			const results = await Promise.allSettled(
+				batch.map(async (project) => {
+					if (!project.projectId || !project.platform) {
+						throw new Error("プロジェクトIDとプラットフォームは必須です");
+					}
+
+					const properties = this.buildNotionProperties(project);
+					const createData: any = {
+						parent: { database_id: this.databaseId },
+						properties: properties,
+					};
+
+					// 詳細説明を本文として追加
+					if (project.description) {
+						createData.children = this.formatDescriptionBlocks(
+							project.description,
+						);
+					}
+
+					const response = await this.notion.pages.create(createData);
+					console.log(
+						`✅ プロジェクトが追加されました: ${project.title || project.projectId}`,
+					);
+					return { project, response };
+				})
+			);
+
+			// 結果を集計
+			for (let j = 0; j < results.length; j++) {
+				const result = results[j];
+				const project = batch[j];
+				
+				if (result.status === "fulfilled") {
+					successCount++;
+				} else {
+					failedCount++;
+					const errorMessage = result.reason?.message || "Unknown error";
+					errors.push({ project, error: errorMessage });
+					console.error(
+						`❌ プロジェクト ${project.title || project.projectId} の追加に失敗: ${errorMessage}`,
+					);
+				}
+			}
+
+			// バッチ間の待機
+			if (i + BATCH_SIZE < projects.length) {
+				await new Promise((resolve) => setTimeout(resolve, 100));
+			}
+		}
+
+		console.log(
+			`\n📊 処理結果: ${successCount}件成功 / ${failedCount}件失敗`,
+		);
+
+		return {
+			success: successCount,
+			failed: failedCount,
+			errors,
+		};
 	}
 
 	/**
 	 * JSONデータをNotionプロパティ形式に変換
-	 * @param data - プロジェクトデータ
-	 * @returns Notionプロパティオブジェクト
 	 */
 	buildNotionProperties(data: ProjectData): NotionProperty {
 		const properties: NotionProperty = {};
@@ -268,7 +322,7 @@ class NotionProjectManager {
 		// プロジェクトID
 		if (data.projectId) {
 			properties["プロジェクトID"] = {
-				number: Number.parseInt(data.projectId),
+				number: Number.parseInt(String(data.projectId)),
 			};
 		}
 
@@ -345,8 +399,6 @@ class NotionProjectManager {
 			};
 		}
 
-		// 詳細説明は本文に含めるため、プロパティには含めない
-
 		// 公開日
 		if (data.publicationDate) {
 			properties["公開日"] = {
@@ -364,72 +416,6 @@ class NotionProjectManager {
 		}
 
 		return properties;
-	}
-
-	/**
-	 * 複数のプロジェクトを一括でupsert
-	 * @param projectsArray - プロジェクトデータの配列
-	 */
-	async upsertMultipleProjects(
-		projectsArray: ProjectData[],
-	): Promise<AddProjectResult[]> {
-		const results: AddProjectResult[] = [];
-		let created = 0;
-		let updated = 0;
-
-		for (const project of projectsArray) {
-			try {
-				await new Promise((resolve) => setTimeout(resolve, 100));
-				if (!project.projectId || !project.platform) {
-					console.warn(
-						"プロジェクトIDまたはプラットフォームが不足:",
-						project.title || "タイトルなし",
-					);
-					continue;
-				}
-
-				const existingPage = await this.findExistingPage(
-					project.projectId,
-					project.platform,
-				);
-				if (existingPage) {
-					console.log("登録済みのためスキップ");
-					continue;
-				}
-
-				const result = await this.upsertProject(project);
-				results.push({ success: true, data: result });
-
-				if (existingPage) {
-					updated++;
-				} else {
-					created++;
-				}
-
-				// API制限を考慮して少し待機
-			} catch (error) {
-				results.push({
-					success: false,
-					error: (error as Error).message,
-					data: project,
-				});
-			}
-		}
-
-		console.log(
-			`\n📊 処理結果: ${created}件作成 / ${updated}件更新 / ${results.filter((r) => !r.success).length}件失敗`,
-		);
-		return results;
-	}
-
-	/**
-	 * 複数のプロジェクトを一括で追加（後方互換性のため残す）
-	 * @param projectsArray - プロジェクトデータの配列
-	 */
-	async addMultipleProjects(
-		projectsArray: ProjectData[],
-	): Promise<AddProjectResult[]> {
-		return this.upsertMultipleProjects(projectsArray);
 	}
 }
 
@@ -454,7 +440,7 @@ async function main() {
 	const projectManager = new NotionProjectManager(NOTION_TOKEN, DATABASE_ID);
 
 	try {
-		// JSONファイルを読み込む
+		// 1. ファイル（プロジェクト）を読み込む
 		console.log(`📄 ファイルを読み込んでいます: ${filePath}`);
 		const fileContent = readFileSync(filePath, "utf-8");
 		const projects = JSON.parse(fileContent) as ProjectData[];
@@ -463,14 +449,64 @@ async function main() {
 			throw new Error("ファイルの内容が配列ではありません");
 		}
 
-		console.log(`🔄 ${projects.length}件のプロジェクトをインポートします...`);
+		console.log(`📝 ${projects.length}件のプロジェクトが見つかりました`);
 
-		// プロジェクトのインポート
-		if (projects.length > 0) {
-			await projectManager.upsertMultipleProjects(projects);
+		// 2. ファイルの一覧に含まれているプロジェクトIDをリスト化する
+		const projectIds = projects
+			.filter((project) => project.projectId && project.platform)
+			.map((project) => ({
+				projectId: Number.parseInt(String(project.projectId)),
+				platform: project.platform as string,
+			}));
+
+		console.log(`🔍 有効なプロジェクトID: ${projectIds.length}件`);
+
+		if (projectIds.length === 0) {
+			console.log("処理対象のプロジェクトがありません");
+			return;
 		}
 
-		console.log("\n✅ インポートが完了しました");
+		// 3. プロジェクトIDのリストがすでにNotion上に登録されているか確認
+		console.log("🔄 Notion DBから既存プロジェクトを確認中...");
+		const existingProjects = await projectManager.findByProjectIds(projectIds);
+
+		const existingProjectIds = new Set<string>(
+			existingProjects.map(
+				(project) => `${project.projectId}-${project.platform}`,
+			),
+		);
+
+		console.log(`✅ 既存プロジェクト: ${existingProjectIds.size}件`);
+
+		// 4. すでにNotion上に存在するプロジェクト以外をnotionに追加する
+		const newProjects = projects.filter((project) => {
+			if (!project.projectId || !project.platform) {
+				return false;
+			}
+			return !existingProjectIds.has(
+				`${Number.parseInt(String(project.projectId))}-${project.platform}`,
+			);
+		});
+
+		console.log(`🆕 追加対象プロジェクト: ${newProjects.length}件`);
+
+		if (newProjects.length === 0) {
+			console.log("追加するプロジェクトがありません（全て既に登録済み）");
+			return;
+		}
+
+		// 新しいプロジェクトのみをNotionに追加
+		const result = await projectManager.addProjects(newProjects);
+
+		console.log("✅ インポートが完了しました");
+		
+		// エラーがあった場合は詳細を表示
+		if (result.failed > 0) {
+			console.log("\n❌ 失敗したプロジェクト:");
+			for (const { project, error } of result.errors) {
+				console.log(`  - ${project.title || project.projectId}: ${error}`);
+			}
+		}
 	} catch (error) {
 		if (error instanceof Error) {
 			if ("code" in error && error.code === "ENOENT") {
