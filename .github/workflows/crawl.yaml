@@ -48,7 +48,7 @@ jobs:
         run: pnpm install
 
       - name: Playwright インストール
-        run: pnpm exec playwright install --only-shell
+        run: pnpm --filter crawl exec playwright install --only-shell
 
       - name: クローリング実行
         run: bun run ./packages/crawl/crawl.ts coconala ${{ join(matrix.urls, ' ') }}
