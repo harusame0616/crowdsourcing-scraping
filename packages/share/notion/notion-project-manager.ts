@@ -115,98 +115,111 @@ export class NotionProjectManager {
 		}
 
 		try {
-			// OR条件を構築して一括でクエリを実行
-			const orConditions = projectIds.map(({ projectId, platform }) => ({
-				and: [
-					{
-						property: "プロジェクトID",
-						number: {
-							equals: projectId,
-						},
-					},
-					{
-						property: "プラットフォーム",
-						select: {
-							equals: platform,
-						},
-					},
-				],
-			}));
-
-			// Notion APIでページング処理
-			let hasMore = true;
-			let startCursor: string | undefined = undefined;
 			const existingProjects: ProjectData[] = [];
+			const BATCH_SIZE = 100; // Notion APIの制限
 
-			while (hasMore) {
-				const response = await this.notion.databases.query({
-					database_id: this.databaseId,
-					filter: {
-						or: orConditions,
-					},
-					start_cursor: startCursor,
-					page_size: 100,
-				});
+			// 100個ずつバッチに分けて処理
+			for (let i = 0; i < projectIds.length; i += BATCH_SIZE) {
+				const batch = projectIds.slice(i, i + BATCH_SIZE);
+				
+				// OR条件を構築して一括でクエリを実行
+				const orConditions = batch.map(({ projectId, platform }) => ({
+					and: [
+						{
+							property: "プロジェクトID",
+							number: {
+								equals: projectId,
+							},
+						},
+						{
+							property: "プラットフォーム",
+							select: {
+								equals: platform,
+							},
+						},
+					],
+				}));
 
-				// Notionのページから ProjectData に変換
-				for (const page of response.results) {
-					if (
-						"properties" in page &&
-						page.properties?.["プロジェクトID"]?.number &&
-						page.properties?.["プラットフォーム"]?.select?.name
-					) {
-						const project: ProjectData = {
-							projectId: page.properties["プロジェクトID"].number,
-							platform: page.properties["プラットフォーム"].select.name,
-						};
+				// Notion APIでページング処理
+				let hasMore = true;
+				let startCursor: string | undefined = undefined;
 
-						// その他のプロパティも取得
-						if (page.properties["名前"]?.title?.[0]?.text?.content) {
-							project.title = page.properties["名前"].title[0].text.content;
-						}
-						if (page.properties["非表示"]?.checkbox !== undefined) {
-							project.hidden = page.properties["非表示"].checkbox;
-						}
-						if (page.properties["報酬タイプ"]?.select?.name) {
-							project.wageType = page.properties["報酬タイプ"].select.name;
-						}
-						if (page.properties["URL"]?.url) {
-							project.url = page.properties["URL"].url;
-						}
-						if (page.properties["カテゴリ"]?.select?.name) {
-							project.category = page.properties["カテゴリ"].select.name;
-						}
+				while (hasMore) {
+					const response = await this.notion.databases.query({
+						database_id: this.databaseId,
+						filter: {
+							or: orConditions,
+						},
+						start_cursor: startCursor,
+						page_size: 100,
+					});
+
+					// Notionのページから ProjectData に変換
+					for (const page of response.results) {
 						if (
-							page.properties["予算最小"]?.number ||
-							page.properties["予算最大"]?.number
+							"properties" in page &&
+							page.properties?.["プロジェクトID"]?.number &&
+							page.properties?.["プラットフォーム"]?.select?.name
 						) {
-							project.budget = {
-								min: page.properties["予算最小"]?.number,
-								max: page.properties["予算最大"]?.number,
+							const project: ProjectData = {
+								projectId: page.properties["プロジェクトID"].number,
+								platform: page.properties["プラットフォーム"].select.name,
 							};
-						}
-						if (page.properties["納期"]?.date?.start) {
-							project.deliveryDate = page.properties["納期"].date.start;
-						}
-						if (page.properties["募集期限"]?.date?.start) {
-							project.recruitingLimit = page.properties["募集期限"].date.start;
-						}
-						if (page.properties["公開日"]?.date?.start) {
-							project.publicationDate = page.properties["公開日"].date.start;
-						}
-						if (page.properties["募集中"]?.checkbox !== undefined) {
-							project.isRecruiting = page.properties["募集中"].checkbox;
-						}
 
-						existingProjects.push(project);
+							// その他のプロパティも取得
+							if (page.properties["名前"]?.title?.[0]?.text?.content) {
+								project.title = page.properties["名前"].title[0].text.content;
+							}
+							if (page.properties["非表示"]?.checkbox !== undefined) {
+								project.hidden = page.properties["非表示"].checkbox;
+							}
+							if (page.properties["報酬タイプ"]?.select?.name) {
+								project.wageType = page.properties["報酬タイプ"].select.name;
+							}
+							if (page.properties["URL"]?.url) {
+								project.url = page.properties["URL"].url;
+							}
+							if (page.properties["カテゴリ"]?.select?.name) {
+								project.category = page.properties["カテゴリ"].select.name;
+							}
+							if (
+								page.properties["予算最小"]?.number ||
+								page.properties["予算最大"]?.number
+							) {
+								project.budget = {
+									min: page.properties["予算最小"]?.number,
+									max: page.properties["予算最大"]?.number,
+								};
+							}
+							if (page.properties["納期"]?.date?.start) {
+								project.deliveryDate = page.properties["納期"].date.start;
+							}
+							if (page.properties["募集期限"]?.date?.start) {
+								project.recruitingLimit = page.properties["募集期限"].date.start;
+							}
+							if (page.properties["公開日"]?.date?.start) {
+								project.publicationDate = page.properties["公開日"].date.start;
+							}
+							if (page.properties["募集中"]?.checkbox !== undefined) {
+								project.isRecruiting = page.properties["募集中"].checkbox;
+							}
+
+							existingProjects.push(project);
+						}
+					}
+
+					hasMore = response.has_more;
+					startCursor = response.next_cursor || undefined;
+
+					// API制限を考慮して少し待機
+					if (hasMore) {
+						await new Promise((resolve) => setTimeout(resolve, 100));
 					}
 				}
 
-				hasMore = response.has_more;
-				startCursor = response.next_cursor || undefined;
-
-				// API制限を考慮して少し待機
-				if (hasMore) {
+				// バッチ間の待機
+				if (i + BATCH_SIZE < projectIds.length) {
+					console.log(`📝 ${i + BATCH_SIZE}/${projectIds.length}件の検索が完了しました...`);
 					await new Promise((resolve) => setTimeout(resolve, 100));
 				}
 			}
