@@ -5,7 +5,9 @@
       "Bash(npx tsc:*)",
       "Bash(mkdir:*)",
       "WebFetch(domain:crowdworks.jp)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(find:*)",
+      "Bash(pnpm list:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
