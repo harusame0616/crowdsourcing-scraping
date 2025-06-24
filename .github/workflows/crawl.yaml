@@ -114,8 +114,6 @@ jobs:
       matrix:
         urls:
           - '"https://www.lancers.jp/work/search/system/websystem?open=1&show_description=1&type%5B%5D=project&type%5B%5D=task&work_rank%5B%5D=0&work_rank%5B%5D=1&work_rank%5B%5D=2&work_rank%5B%5D=3" "https://www.lancers.jp/work/search/system/software?open=1&show_description=1&type%5B%5D=project&type%5B%5D=task&work_rank%5B%5D=0&work_rank%5B%5D=1&work_rank%5B%5D=2&work_rank%5B%5D=3" "https://www.lancers.jp/work/search/system/code_bug_fixes?open=1&show_description=1&type%5B%5D=project&type%5B%5D=task&work_rank%5B%5D=0&work_rank%5B%5D=1&work_rank%5B%5D=2&work_rank%5B%5D=3" "https://www.lancers.jp/work/search/system/othersystem?open=1&show_description=1&type%5B%5D=project&type%5B%5D=task&work_rank%5B%5D=0&work_rank%5B%5D=1&work_rank%5B%5D=2&work_rank%5B%5D=3"'
-          - '"https://crowdworks.jp/public/jobs/search?category_id=173&order=new" "https://crowdworks.jp/public/jobs/search?category_id=78&order=new" "https://crowdworks.jp/public/jobs/search?category_id=346&order=new"'
-          - '"https://crowdworks.jp/public/jobs/search?category_id=347&order=new" "https://crowdworks.jp/public/jobs/search?category_id=348&order=new" "https://crowdworks.jp/public/jobs/search?category_id=269&order=new"'
 
     steps:
       - name: リポジトリチェックアウト
@@ -149,7 +147,7 @@ jobs:
       - name: クロール結果をアップロード
         uses: actions/upload-artifact@v4
         with:
-          name: crawl-results-crowdworks-${{ strategy.job-index }}
+          name: crawl-results-lancers-${{ strategy.job-index }}
           path: outputs/*.json
           retention-days: 1
   update-notion:
